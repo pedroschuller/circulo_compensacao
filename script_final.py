@@ -68,9 +68,11 @@ def reduzir(df, tam_circ_comp, min_circ):
 
     for _ in range(tam_circ_comp + mandatos_a_retirar): 
         # Eleitores por deputado
-        df["eleitores por mandato"] = df["inscritos"] / df["mandatos"] 
+        df["eleitores_por_mandato"] = df["inscritos"] / df["mandatos"] 
+        # Círculos que já não podem perder mais
+        df["atingiu_minimo"] = df["mandatos"].apply(lambda x: x == min_circ)
         # Círculo com menos eleitores por deputado
-        df.sort_values(["mandatos", "eleitores por mandato"], inplace=True) 
+        df.sort_values(["atingiu_minimo", "eleitores_por_mandato"], inplace=True, ignore_index=True) 
         # Retirar mandato
         df.iloc[0, df.columns.get_loc("mandatos")] -= 1  
     
@@ -94,7 +96,6 @@ def calcular_desvio(df_votos):
     return df_votos_nacional, soma_dos_desvios
 
 
-#circ_comp = 0
 def metodo_hondt(df_mandatos, df_votos, circ_comp):
     df_hondt = df_votos.iloc[:0,:].copy()
 
@@ -185,7 +186,7 @@ def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_mi
         votos_perdidos = sum(df_perdidos['votos'])
         df_desvios.loc[len(df_desvios)] = [t, desvio*100.0, votos_perdidos]
         
-    # guardar resultados
+    # Guardar resultados
     if(len(lista_tamanhos_cc)==1):
         df_simulacao.to_csv(f'simulacoes\\simulacao_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
     else:
@@ -194,7 +195,7 @@ def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_mi
 
     return 0
 
-# simular todas as eleicoes
+# Simular todas as eleicoes
 def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231)):
     for ficheiro in eleicoes:
         eleicao = os.path.splitext(ficheiro)[0]
@@ -209,8 +210,8 @@ def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231)):
 
     return erro
 
-# Simular todos os tamanhos
-#lista_tamanhos_cc = range(0, 231, 10)
+# Simular sequência de tamanhos do círculo de compensação (min, max+1, step)
+#lista_tamanhos_cc = range(0, 231, 1)
 
 # Simular um tamanho
 lista_tamanhos_cc = [37]
@@ -220,6 +221,7 @@ tamanho_circulo_minimo = 2
 
 # Listar eleições a simular
 eleicoes = os.listdir('eleicoes')
+eleicoes = [eleicoes[3]]
 
 if __name__ == "__main__":
    main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc)
