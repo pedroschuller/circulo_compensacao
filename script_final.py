@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.patches import ConnectionPatch
 import janitor
 import os
 import re
@@ -166,13 +167,41 @@ def metodo_hondt(df_mandatos, df_votos, circ_comp):
     
     return df_hondt, df_perdidos
 
-
 # Desenhar gráfico com votos perdidos e desvio de proporcionalidade por tamanho do círculo de compensação
-def plot_desvios(df_desvios, eleicoes):
-    fig, ax = plt.subplots(figsize = (10, 5)) 
-    df_desvios.plot(x = 'circulo_compensacao', y = 'desvio_proporcionalidade', ax = ax, title = eleicoes) 
-    df_desvios.plot(x = 'circulo_compensacao', y = 'votos_perdidos', ax = ax, secondary_y = True) 
-    fig.savefig(f'plots\\{eleicoes}.jpg')
+def plot_desvios(df_desvios, eleicao):
+    # Criar 2 plots
+    fig, (ax0, ax1) = plt.subplots(2,1,figsize = (10, 5)) 
+
+    # Dados detalhe
+    df_desvios_focus = df_desvios.loc[(df_desvios['circulo_compensacao']>=10)&(df_desvios['circulo_compensacao']<=65)]
+
+    # Gráfico detalhe
+    df_desvios_focus.plot(x = 'circulo_compensacao', y = 'desvio_proporcionalidade', ax = ax0, title = eleicao, ),  
+    df_desvios_focus.plot(x = 'circulo_compensacao', y = 'votos_perdidos', ax = ax0, secondary_y = True)
+    ax0.set(xlabel=None)
+    ax0.get_legend().remove()
+
+    # Gráfico total
+    df_desvios.plot(x = 'circulo_compensacao', y = 'desvio_proporcionalidade', ax = ax1) 
+    df_desvios.plot(x = 'circulo_compensacao', y = 'votos_perdidos', ax = ax1, secondary_y = True)    
+
+    # Área zoom
+    ax1.fill_between((10,65), 0, max(df_desvios_focus['desvio_proporcionalidade']), facecolor='grey', alpha=0.1)
+
+    # Linha esquerda
+    con1 = ConnectionPatch(xyA=(10, max(df_desvios_focus['desvio_proporcionalidade'])), coordsA=ax1.transData, 
+                        xyB=(7.5, min(df_desvios_focus['desvio_proporcionalidade'])-1), coordsB=ax0.transData, color = 'black')
+    con1.set_linewidth(0.3)
+    fig.add_artist(con1)
+
+    # Linha direita
+    con2 = ConnectionPatch(xyA=(65, max(df_desvios_focus['desvio_proporcionalidade'])), coordsA=ax1.transData, 
+                        xyB=(67.5, min(df_desvios_focus['desvio_proporcionalidade'])-1), coordsB=ax0.transData, color = 'black')
+    con2.set_linewidth(0.3)
+    fig.add_artist(con2)
+
+    fig.savefig(f'plots\\{eleicao}.jpg')
+    return 0
 
 
 def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao):
@@ -210,18 +239,18 @@ def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231)):
 
     return erro
 
-# Simular sequência de tamanhos do círculo de compensação (min, max+1, step)
-#lista_tamanhos_cc = range(0, 231, 1)
+# Simular sequência de tamanhos do círculo de compensação (min, max+1, [step])
+lista_tamanhos_cc = range(0, 231, 1)
 
 # Simular um tamanho
-lista_tamanhos_cc = [37]
+#lista_tamanhos_cc = [37]
 
 # Mínimo de mandatos por círculo distrital
 tamanho_circulo_minimo = 2
 
 # Listar eleições a simular
 eleicoes = os.listdir('eleicoes')
-eleicoes = [eleicoes[3]]
+#eleicoes = [eleicoes[3]]
 
 if __name__ == "__main__":
    main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc)
