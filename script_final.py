@@ -67,7 +67,7 @@ def reduzir(df, tam_circ_comp, min_circ):
     # Se o tamanho mínimo deu deputados, temos que os retirar de outro circulo
     mandatos_a_retirar = mandatos_corrigidos - mandatos_atuais 
 
-    for _ in range(tam_circ_comp + mandatos_a_retirar): 
+    for _ in range(tam_circ_comp + int(mandatos_a_retirar)): 
         # Eleitores por deputado
         df["eleitores_por_mandato"] = df["inscritos"] / df["mandatos"] 
         # Círculos que já não podem perder mais
@@ -172,31 +172,41 @@ def plot_desvios(df_desvios, eleicao):
     # Criar 2 plots
     fig, (ax0, ax1) = plt.subplots(2,1,figsize = (10, 5)) 
 
+    # Tornar nomes mais legíveis
+    df_desvios_nomes = df_desvios.rename(columns={"circulo_compensacao":"Tamanho do Círculo de Compensação"
+                                                  , "desvio_proporcionalidade":"Desvio de proporcionalidade (%)"
+                                                  , "votos_perdidos": "Votos perdidos"})
+
     # Dados detalhe
-    df_desvios_focus = df_desvios.loc[(df_desvios['circulo_compensacao']>=10)&(df_desvios['circulo_compensacao']<=65)]
+    df_desvios_focus = df_desvios_nomes.loc[df_desvios_nomes['Tamanho do Círculo de Compensação']<=55]
+
+    # Definir valor máximo do eixo dos y
+    max_y = max([-(-int(max(df_desvios_focus['Desvio de proporcionalidade (%)'])+1)//5)*5, -(-int(max(df_desvios_focus['Votos perdidos'])+1)//125000)*5])
+    max_y2 = max_y * 25000
 
     # Gráfico detalhe
-    df_desvios_focus.plot(x = 'circulo_compensacao', y = 'desvio_proporcionalidade', ax = ax0, title = eleicao, ),  
-    df_desvios_focus.plot(x = 'circulo_compensacao', y = 'votos_perdidos', ax = ax0, secondary_y = True)
+    df_desvios_focus.plot(x = 'Tamanho do Círculo de Compensação', y = 'Desvio de proporcionalidade (%)', ax = ax0, title = eleicao, ylim = (0, max_y), yticks = range(0,max_y+5,5), grid = True)
+    df_desvios_focus.plot(x = 'Tamanho do Círculo de Compensação', y = 'Votos perdidos', ax = ax0, secondary_y = True, mark_right = False, label = 'Votos perdidos (eixo direita)', ylim = (0, max_y2), yticks = range(0,max_y2+125000,125000))
     ax0.set(xlabel=None)
     ax0.get_legend().remove()
 
+
     # Gráfico total
-    df_desvios.plot(x = 'circulo_compensacao', y = 'desvio_proporcionalidade', ax = ax1) 
-    df_desvios.plot(x = 'circulo_compensacao', y = 'votos_perdidos', ax = ax1, secondary_y = True)    
+    df_desvios_nomes.plot(x = 'Tamanho do Círculo de Compensação', y = 'Desvio de proporcionalidade (%)', ax = ax1, ylim = (0, max_y), yticks = range(0,max_y+5,5)) 
+    df_desvios_nomes.plot(x = 'Tamanho do Círculo de Compensação', y = 'Votos perdidos', ax = ax1, secondary_y = True, ylim = (0, max_y2), yticks = range(0,max_y2+125000,125000))  
 
     # Área zoom
-    ax1.fill_between((10,65), 0, max(df_desvios_focus['desvio_proporcionalidade']), facecolor='grey', alpha=0.1)
+    ax1.fill_between((0,55), 0, max_y, facecolor='grey', alpha=0.1)
 
     # Linha esquerda
-    con1 = ConnectionPatch(xyA=(10, max(df_desvios_focus['desvio_proporcionalidade'])), coordsA=ax1.transData, 
-                        xyB=(7.5, min(df_desvios_focus['desvio_proporcionalidade'])-1), coordsB=ax0.transData, color = 'black')
+    con1 = ConnectionPatch(xyA=(0, max_y), coordsA=ax1.transData, 
+                        xyB=(-2.5, -0.5), coordsB=ax0.transData, color = 'black')
     con1.set_linewidth(0.3)
     fig.add_artist(con1)
 
     # Linha direita
-    con2 = ConnectionPatch(xyA=(65, max(df_desvios_focus['desvio_proporcionalidade'])), coordsA=ax1.transData, 
-                        xyB=(67.5, min(df_desvios_focus['desvio_proporcionalidade'])-1), coordsB=ax0.transData, color = 'black')
+    con2 = ConnectionPatch(xyA=(55, max_y), coordsA=ax1.transData, 
+                        xyB=(57.5, -0.5), coordsB=ax0.transData, color = 'black')
     con2.set_linewidth(0.3)
     fig.add_artist(con2)
 
@@ -243,14 +253,14 @@ def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231)):
 lista_tamanhos_cc = range(0, 231, 1)
 
 # Simular um tamanho
-#lista_tamanhos_cc = [37]
+#lista_tamanhos_cc = [40]
 
 # Mínimo de mandatos por círculo distrital
 tamanho_circulo_minimo = 2
 
 # Listar eleições a simular
 eleicoes = os.listdir('eleicoes')
-#eleicoes = [eleicoes[3]]
+#eleicoes = [eleicoes[0]]
 
 if __name__ == "__main__":
    main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc)
