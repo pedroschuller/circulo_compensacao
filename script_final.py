@@ -21,8 +21,9 @@ def obter_base(path, ano):
     df_int = pd.read_excel(path, sheet_name=sheet_int, skiprows = 3, nrows = 5) 
 
     # Corrigir nomes
-    df_nac.rename(columns={"nome do território": "distrito", "distrito/região autónoma": "distrito", 'círculo':'distrito', 'nome do distrito/região autónoma':'distrito'}, inplace = True)
-    df_int.rename(columns={"nome do território": "distrito", "distrito/região autónoma": "distrito", 'círculo':'distrito', 'nome do distrito/região autónoma':'distrito'}, inplace = True)
+    mapping={"nome do território": "distrito", "distrito/região autónoma": "distrito", 'círculo':'distrito', 'nome do distrito/região autónoma':'distrito'}
+    df_nac.rename(columns=mapping, inplace = True)
+    df_int.rename(columns=mapping, inplace = True)
 
     # Filtrar linhas
     df_total = pd.concat([df_nac.loc[(df_nac["código"]!=500000) & (df_nac["código"]!=990000)], 
@@ -97,7 +98,7 @@ def calcular_desvio(df_votos):
     return df_votos_nacional, soma_dos_desvios
 
 
-def metodo_hondt(df_mandatos, df_votos, circ_comp):
+def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
     df_hondt = df_votos.iloc[:0,:].copy()
 
     # Retirar nulos e brancos
@@ -130,8 +131,12 @@ def metodo_hondt(df_mandatos, df_votos, circ_comp):
         # Acrescentar resultados do distrito
         df_hondt = pd.concat([df_hondt, votos_d[df_hondt.columns]], ignore_index = True)
 
-    # Agregar todos os votos a nível nacional     
-    df_compensacao = df_hondt.groupby("partido", as_index=False)[['votos', 'mandatos']].sum()
+    # Agregar todos os votos a nível nacional (com ou sem estrangeiros)
+    if incluir_estrangeiros:
+        df_compensacao = df_hondt.groupby("partido", as_index=False)[['votos', 'mandatos']].sum()
+    else:
+        df_compensacao = df_hondt[~df_hondt.distrito.isin(['Europa', 'Fora da Europa'])].groupby("partido", as_index=False)[['votos', 'mandatos']].sum()
+
 
     # Inicializar mandatos atribuidos no circulo de compensacao e algoritmo 
     df_compensacao['mandatos_compensacao'] = 0
@@ -214,13 +219,13 @@ def plot_desvios(df_desvios, eleicao):
     return 0
 
 
-def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao):
+def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros):
 
     df_desvios = pd.DataFrame(columns = ['circulo_compensacao', 'desvio_proporcionalidade', 'votos_perdidos'])
 
     for t in lista_tamanhos_cc:
         df_reduzido = reduzir(df_mandatos, t, tamanho_circulo_minimo)
-        df_simulacao, df_perdidos = metodo_hondt(df_reduzido, df_votos, t)
+        df_simulacao, df_perdidos = metodo_hondt(df_reduzido, df_votos, t, incluir_estrangeiros)
         _, desvio = calcular_desvio(df_simulacao)
         votos_perdidos = sum(df_perdidos['votos'])
         df_desvios.loc[len(df_desvios)] = [t, desvio*100.0, votos_perdidos]
@@ -235,8 +240,9 @@ def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_mi
     return 0
 
 # Simular todas as eleicoes
-def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231)):
+def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231), incluir_estrangeiro = True):
     for ficheiro in eleicoes:
+        #ficheiro = eleicoes[0]
         eleicao = os.path.splitext(ficheiro)[0]
         print(eleicao)
         path = f'eleicoes\\{ficheiro}'
@@ -244,13 +250,15 @@ def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231)):
         df_total = obter_base(path, ano)
         df_mandatos = obter_mandatos(df_total)
         df_votos = obter_votos(df_total)
-        erro = simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao)
+        erro = simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiro)
         plt.close('all')
 
     return erro
 
 # Simular sequência de tamanhos do círculo de compensação (min, max+1, [step])
 lista_tamanhos_cc = range(0, 231, 1)
+
+## OU ##
 
 # Simular um tamanho
 #lista_tamanhos_cc = [40]
@@ -262,5 +270,8 @@ tamanho_circulo_minimo = 2
 eleicoes = os.listdir('eleicoes')
 #eleicoes = [eleicoes[0]]
 
+# Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação?
+incluir_estrangeiro = False
+
 if __name__ == "__main__":
-   main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc)
+   main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc, incluir_estrangeiro)
