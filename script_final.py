@@ -2,13 +2,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import ConnectionPatch
 import janitor
+import operator
 import os
 import re
-
-pd.options.mode.chained_assignment = None
-pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
-pd.set_option('display.width', None)
 
 
 # Limpar dados base
@@ -189,31 +185,34 @@ def plot_desvios(df_desvios, eleicao):
     max_y = max([-(-int(max(df_desvios_focus['Desvio de proporcionalidade (%)'])+1)//5)*5, -(-int(max(df_desvios_focus['Votos perdidos'])+1)//125000)*5])
     max_y2 = max_y * 25000
 
-    # Gráfico detalhe
-    df_desvios_focus.plot(x = 'Tamanho do Círculo de Compensação', y = 'Desvio de proporcionalidade (%)', ax = ax0, title = eleicao, ylim = (0, max_y), yticks = range(0,max_y+5,5), grid = True)
-    df_desvios_focus.plot(x = 'Tamanho do Círculo de Compensação', y = 'Votos perdidos', ax = ax0, secondary_y = True, mark_right = False, label = 'Votos perdidos (eixo direita)', ylim = (0, max_y2), yticks = range(0,max_y2+125000,125000))
-    ax0.set(xlabel=None)
-    ax0.get_legend().remove()
-
-
     # Gráfico total
-    df_desvios_nomes.plot(x = 'Tamanho do Círculo de Compensação', y = 'Desvio de proporcionalidade (%)', ax = ax1, ylim = (0, max_y), yticks = range(0,max_y+5,5)) 
-    df_desvios_nomes.plot(x = 'Tamanho do Círculo de Compensação', y = 'Votos perdidos', ax = ax1, secondary_y = True, ylim = (0, max_y2), yticks = range(0,max_y2+125000,125000))  
+    df_desvios_nomes.plot(x = 'Tamanho do Círculo de Compensação', y = 'Desvio de proporcionalidade (%)', ax = ax0, mark_right = False,  title = eleicao, ylim = (0, max_y), yticks = range(0,max_y+5,5), ) 
+    df_desvios_nomes.plot(x = 'Tamanho do Círculo de Compensação', y = 'Votos perdidos', ax = ax0, secondary_y = True, mark_right = False, label = 'Votos perdidos (eixo direita)', ylim = (0, max_y2), yticks = range(0,max_y2+125000,125000))  
+    ax0.set(xlabel=None)
+
+    # Gráfico detalhe
+    df_desvios_focus.plot(x = 'Tamanho do Círculo de Compensação', y = 'Desvio de proporcionalidade (%)', ax = ax1, ylim = (0, max_y), yticks = range(0,max_y+5,5), grid = True)
+    df_desvios_focus.plot(x = 'Tamanho do Círculo de Compensação', y = 'Votos perdidos', ax = ax1, secondary_y = True, ylim = (0, max_y2), yticks = range(0,max_y2+125000,125000))
+    ax1.get_legend().remove()
 
     # Área zoom
-    ax1.fill_between((0,55), 0, max_y, facecolor='grey', alpha=0.1)
+    ax0.fill_between((0,55), 0, max_y, facecolor='grey', alpha=0.1)
 
     # Linha esquerda
-    con1 = ConnectionPatch(xyA=(0, max_y), coordsA=ax1.transData, 
-                        xyB=(-2.5, -0.5), coordsB=ax0.transData, color = 'black')
+    con1 = ConnectionPatch(xyA=(0, 0), coordsA=ax0.transData, 
+                        xyB=(-2.5, max_y), coordsB=ax1.transData, color = 'black')
     con1.set_linewidth(0.3)
     fig.add_artist(con1)
 
     # Linha direita
-    con2 = ConnectionPatch(xyA=(55, max_y), coordsA=ax1.transData, 
-                        xyB=(57.5, -0.5), coordsB=ax0.transData, color = 'black')
+    con2 = ConnectionPatch(xyA=(55, 0), coordsA=ax0.transData, 
+                        xyB=(57.5, max_y), coordsB=ax1.transData, color = 'black')
     con2.set_linewidth(0.3)
     fig.add_artist(con2)
+
+    # Adicionar legendas dos eixos y
+    fig.text(x=0.075,y=0.275,s="Desvio de proporcionalidade (%)", rotation = 'vertical')
+    fig.text(x=0.975,y=0.38,s="Votos perdidos", rotation = 'vertical')
 
     fig.savefig(f'plots\\{eleicao}.jpg')
     return 0
@@ -255,23 +254,27 @@ def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231), in
 
     return erro
 
-# Simular sequência de tamanhos do círculo de compensação (min, max+1, [step])
-lista_tamanhos_cc = range(0, 231, 1)
-
-## OU ##
-
-# Simular um tamanho
-#lista_tamanhos_cc = [40]
 
 # Mínimo de mandatos por círculo distrital
 tamanho_circulo_minimo = 2
 
+# Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação?
+incluir_estrangeiros = False
+
+# simulação não pode retirar mais deputados do que o mínimo 
+tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
+
+# Simular sequência de tamanhos do círculo de compensação (min, max+1, [step])
+lista_tamanhos_cc = range(0, tamanho_maximo_circulo_compensacao+1, 1)
+
+## OU ##
+
+# Simular um tamanho
+#lista_tamanhos_cc = [28]
+
 # Listar eleições a simular
 eleicoes = os.listdir('eleicoes')
-#eleicoes = [eleicoes[0]]
-
-# Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação?
-incluir_estrangeiro = False
+#eleicoes = [eleicoes[6]]
 
 if __name__ == "__main__":
-   main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc, incluir_estrangeiro)
+   main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc, incluir_estrangeiros)
