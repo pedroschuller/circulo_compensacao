@@ -16,14 +16,13 @@ mapping_partidos = {'E':'PNR',
                     'PPV/CDC':'CH',
                     'CDS-PP.PPM':'CDS-PP',
                     'L/TDA':'L',
-                    'PDR':'ADN',
                     'PPD/PSD.CDS-PP':'PPD/PSD',
                     'PTP-MAS':'PTP',
                     'PPD/PSD.CDS-PP.PPM':'PPD/PSD',
                     'PCTP/MRPP':'MRPP'}
 
 # Partidos da esquerda para a direita (discutível mas suficiente)
-ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', 'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', 'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PPD/PSD', 'IL', 'A', 'CDS-PP', 'PPM', 'PND', 'CH', 'ADN', 'PNR']
+ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', 'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', 'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', 'PPD/PSD', 'IL', 'A', 'CDS-PP', 'PPM', 'PND', 'CH', 'ADN', 'PNR']
 
 # Abreviar distritos para o plot
 mapping_distritos = {'Castelo Branco':'C. Branco',
@@ -32,7 +31,7 @@ mapping_distritos = {'Castelo Branco':'C. Branco',
                      'Compensação':'Comp.'}
 
 # Cores aproximadas dos partidos em RGBA
-cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'orange', 'cyan', 'cyan', 'blue', 'darkblue', 'red', 'darkblue', 'yellow', 'red']
+cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 'orange', 'cyan', 'cyan', 'blue', 'darkblue', 'red', 'darkblue', 'yellow', 'red']
 df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
 # Limpar dados base
