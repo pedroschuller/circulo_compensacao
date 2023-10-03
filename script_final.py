@@ -5,7 +5,35 @@ import janitor
 import operator
 import os
 import re
+import numpy as np
 
+
+#Substituir coligações, fusões ou rebrandings pelo maior partido (simplificação)
+mapping_partidos = {'E':'PNR',
+                    'P.N.R.':'PNR',
+                    'MPT-P.H.':'MPT',
+                    'PPV':'CH',
+                    'PPV/CDC':'CH',
+                    'CDS-PP.PPM':'CDS-PP',
+                    'L/TDA':'L',
+                    'PDR':'ADN',
+                    'PPD/PSD.CDS-PP':'PPD/PSD',
+                    'PTP-MAS':'PTP',
+                    'PPD/PSD.CDS-PP.PPM':'PPD/PSD',
+                    'PCTP/MRPP':'MRPP'}
+
+# Partidos da esquerda para a direita (discutível mas suficiente)
+ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', 'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', 'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PPD/PSD', 'IL', 'A', 'CDS-PP', 'PPM', 'PND', 'CH', 'ADN', 'PNR']
+
+# Abreviar distritos para o plot
+mapping_distritos = {'Castelo Branco':'C. Branco',
+                     'Viana do Castelo': 'V. Castelo',
+                     'Fora da Europa':'F. Europa',
+                     'Compensação':'Comp.'}
+
+# Cores aproximadas dos partidos em RGBA
+cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'orange', 'cyan', 'cyan', 'blue', 'darkblue', 'red', 'darkblue', 'yellow', 'red']
+df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
 # Limpar dados base
 def obter_base(path, ano):
@@ -21,7 +49,7 @@ def obter_base(path, ano):
     df_nac.rename(columns=mapping, inplace = True)
     df_int.rename(columns=mapping, inplace = True)
 
-    # Filtrar linhas
+    # Filtrar linhas #PROBLEM
     df_total = pd.concat([df_nac.loc[(df_nac["código"]!=500000) & (df_nac["código"]!=990000)], 
                         df_int.loc[df_int["código"]==800000],
                         df_int.loc[df_int["código"]==810000], 
@@ -41,15 +69,18 @@ def obter_mandatos(df_total):
 
 # Resultados dos partidos, nulos e brancos
 def obter_votos(df_total): 
-    df_partidos = pd.concat([df_total.iloc[:,0:2], df_total.iloc[:,14:], df_total.iloc[:,9:13]], axis = 1).fillna(0)
-    df_partidos_treat = df_partidos.pivot_longer(
+    df_votos = pd.concat([df_total.iloc[:,0:2], df_total.iloc[:,14:], df_total.iloc[:,9:13]], axis = 1).fillna(0)
+    df_votos = df_votos.pivot_longer(
                             index = ['código','distrito']
                             , names_to = ["partido", "drop1", "drop2"]
                             , values_to = ["votos", "% votos", "mandatos"]
                             , names_pattern = ["^brancos|^nulos|[A-Z]", "% brancos|% nulos|% votantes.*", "mandatos.*"]
                         ).drop(columns=['drop1', 'drop2'])
     
-    return df_partidos_treat
+    df_votos['partido'].replace(mapping_partidos, inplace = True)
+    df_votos = df_votos.groupby(['código', 'distrito', 'partido']).sum().reset_index()
+    
+    return df_votos
 
 
 # Retirar mandatos aos círculos distritais para o de compensacao
@@ -94,6 +125,7 @@ def calcular_desvio(df_votos):
     return df_votos_nacional, soma_dos_desvios
 
 
+# Algoritmo Método d'Hondt
 def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
     df_hondt = df_votos.iloc[:0,:].copy()
 
@@ -168,6 +200,7 @@ def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
     
     return df_hondt, df_perdidos
 
+
 # Desenhar gráfico com votos perdidos e desvio de proporcionalidade por tamanho do círculo de compensação
 def plot_desvios(df_desvios, eleicao):
     # Criar 2 plots
@@ -218,6 +251,175 @@ def plot_desvios(df_desvios, eleicao):
     return 0
 
 
+# Função gráfico hemiciclo 
+def plot_hemiciclo(ax, mandatos, votos, cores, title, ordem_partidos):
+    mandatos = np.append(mandatos, np.sum(mandatos))
+    votos = np.append(votos, np.sum(votos))
+    cores = np.append(cores, 'white')  # Add a white color for the gap
+    ordem_partidos = np.append(ordem_partidos, '')  # Add an empty label for the gap
+
+    # Create the pie charts with edges and labels
+    wedges1, _ = ax.pie(mandatos, colors=cores, startangle=180, radius=1.0, counterclock=False, 
+           wedgeprops=dict(width=0.3, edgecolor='k'))
+    wedges2, _ =ax.pie(votos, colors=cores, startangle=180, radius=0.7, counterclock=False, 
+           wedgeprops=dict(width=0.3, edgecolor='k'), labels=None)
+    
+    # Set the aspect ratio and title
+    ax.set(aspect="equal", title=title)
+
+    # Remove edge for the white wedge
+    for wedge in wedges1 + wedges2:
+        if wedge.get_facecolor() == (1.0, 1.0, 1.0, 1.0):  # Check if the wedge color is white
+            wedge.set_edgecolor("white")  # Set edge color to white
+
+    # Adding labels for mandatos > 0
+    cumulative_sum = (np.cumsum(mandatos) - mandatos/2)*180/230  # Calculate position of text label
+    last_y = 0
+    for i, (wedge, label) in enumerate(zip(wedges1, ordem_partidos)):
+        if mandatos[i] > 0 and cores[i] != 'white':  # Only add label if mandatos > 0 and color is not white
+            x = 1.2 * np.cos(np.radians(180 - cumulative_sum[i]))  # x position
+            y = 1.2 * np.sin(np.radians(180 - cumulative_sum[i]))  # y position
+            
+            # Adjust y position to prevent overlap
+            if i > 1 and abs(last_y - y) < 0.05:  # Adjust the threshold as needed
+                y = last_y - 0.07  # Adjust the offset as needed
+            
+            ax.text(x, y, f"{label}: {int(mandatos[i])}", ha='center', va='center', fontsize=8)  # Adjust fontsize as needed
+            last_y = y  # Store the last y position
+
+
+# Desenhar gráficos de comparação entre a situação atual e a introdução de um círculo de compensação
+def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, lista_tamanhos_cc):
+
+    # Preparar dados
+    df_merge_votos = pd.merge(df_votos.dropna(), right = df_simulacao, on = ['código', 'distrito', 'partido'], how = 'right', suffixes = ('', '_cc'))
+    df_merge_votos['votos_perdidos'] = np.where(df_merge_votos.mandatos == 0, df_merge_votos.votos, 0)
+    df_merge_votos = pd.merge(df_merge_votos, right = df_perdidos, on = ['código', 'distrito', 'partido'], how = 'left', suffixes = ('', '_perdidos_cc')).fillna(0)
+    df_distritos = df_merge_votos.groupby(['distrito'])[['votos', 'mandatos', 'mandatos_cc', 'votos_perdidos', 'votos_perdidos_cc']].agg('sum')
+    df_merge_votos = df_merge_votos.groupby(['partido'])[['votos', 'mandatos', 'mandatos_cc', 'votos_perdidos', 'votos_perdidos_cc']].agg('sum')
+    df_merge_votos['%votos_nao_convertidos'] = 100.0 * df_merge_votos.votos_perdidos / df_merge_votos.votos
+    df_merge_votos['%votos_nao_convertidos_cc'] = 100.0 * df_merge_votos.votos_perdidos_cc / df_merge_votos.votos
+    df_merge_votos['votos_por_deputado'] = df_merge_votos.votos / df_merge_votos.mandatos 
+    df_merge_votos['votos_por_deputado_cc'] = df_merge_votos.votos / df_merge_votos.mandatos_cc
+
+    df_reorganizacao_mandatos = pd.merge(df_mandatos[['distrito', 'mandatos']], right = df_reduzido[['distrito', 'mandatos']], on = 'distrito', suffixes=('', '_cc'))
+    df_reorganizacao_mandatos['diferenca'] = df_reorganizacao_mandatos.mandatos - df_reorganizacao_mandatos.mandatos_cc
+    df_reorganizacao_mandatos.loc[len(df_reorganizacao_mandatos)] = ['Compensação', 0, 0, lista_tamanhos_cc[0]]
+
+
+    # Hemiciclo
+    cores_usar = df_cores[df_cores.index.isin(df_merge_votos.index)]['cor']
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    plot_hemiciclo(axs[0], df_merge_votos['mandatos'][cores_usar.index], df_merge_votos['votos'][cores_usar.index], cores_usar.values, 'Atual', cores_usar.index)
+    plot_hemiciclo(axs[1], df_merge_votos['mandatos_cc'][cores_usar.index], df_merge_votos['votos'][cores_usar.index], cores_usar.values, 'Com Círculo de Compensação', cores_usar.index)
+    fig.suptitle(eleicao)
+    fig.savefig(f'plots\\proporcionalidade_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
+
+
+    # Votos que não serviram para eleger por partido
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    df_merge_votos.sort_values(['%votos_nao_convertidos', 'votos'], ascending = [False, True], inplace = True)
+    hbar_colors = cores_usar.reindex(df_merge_votos.index.values)
+    axs[0].barh(df_merge_votos.index, df_merge_votos['%votos_nao_convertidos'], color = hbar_colors)
+    axs[0].set_xlabel('Votos não convertidos em cada partido (%)')
+    axs[0].set_title('Atual')
+    axs[1].barh(df_merge_votos.index, df_merge_votos['%votos_nao_convertidos_cc'], color = hbar_colors)
+    axs[1].set_xlabel('Votos não convertidos em cada partido (%)')
+    axs[1].set_title('Círculo de Compensação')
+    fig.suptitle(eleicao)
+    fig.savefig(f'plots\\votos_nao_convertidos_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
+
+
+    # Votos para eleger um deputado por partido
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    df_merge_votos.sort_values(['votos_por_deputado', 'votos'], ascending = [False, True], inplace = True)
+    hbar_colors = cores_usar.reindex(df_merge_votos.index.values)
+    axs[0].barh(df_merge_votos.index, df_merge_votos['votos_por_deputado'], color = hbar_colors)
+    axs[0].set_xlabel('Votos necessários para eleger um deputado')
+    axs[0].set_title('Atual')
+    axs[1].barh(df_merge_votos.index, df_merge_votos['votos_por_deputado_cc'], color = hbar_colors)
+    axs[1].set_xlabel('Votos necessários para eleger um deputado')
+    axs[1].set_title('Círculo de Compensação')
+    fig.suptitle(eleicao)
+    fig.savefig(f'plots\\votos_por_deputado_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
+
+
+    # Reorganização de mandatos por distrito
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    df_reorganizacao_mandatos.sort_values(['mandatos', 'mandatos_cc'], inplace = True)
+    df_reorganizacao_mandatos['distrito'].replace(mapping_distritos, inplace = True)
+    hbar=axs[0].barh(df_reorganizacao_mandatos.distrito, df_reorganizacao_mandatos.mandatos)
+    axs[0].bar_label(hbar)
+    axs[0].set_xlabel('Mandatos por distrito')
+    axs[0].set_title('Atual')
+    axs[1].barh(df_reorganizacao_mandatos.distrito, df_reorganizacao_mandatos.mandatos_cc)
+    cores_mandatos = ['red']*(len(df_reorganizacao_mandatos)-1)
+    cores_mandatos.insert(0, 'green')
+    # Create the bar chart
+    axs[1].barh(df_reorganizacao_mandatos.distrito, df_reorganizacao_mandatos.diferenca, left=df_reorganizacao_mandatos.mandatos_cc, color=cores_mandatos)
+
+    # Iterate over the bars, and add labels
+    for index, value in enumerate(df_reorganizacao_mandatos.distrito):
+        # Get width of the 'mandatos_cc' bar
+        width_cc = df_reorganizacao_mandatos.mandatos_cc.iloc[index]
+        # Get width of the 'diferenca' bar
+        width_diff = df_reorganizacao_mandatos.diferenca.iloc[index]
+        
+        # Position label for 'mandatos_cc' closer to the end of the bar segment
+        label_x_pos_cc = width_cc - (width_cc * 0.1)  # Adjust the multiplier as needed to position the label
+        
+        # Add text label inside 'mandatos_cc' bar segment
+        axs[1].text(label_x_pos_cc, index, str(width_cc), color='white', ha='right', va='center')
+        
+        # Check if 'diferenca' is not zero before adding label
+        if width_diff != 0:
+            # Position label for 'diferenca' outside the bar, offset by the width of 'mandatos_cc'
+            label_x_pos_diff = width_cc + width_diff + (abs(width_diff) * 0.1)  # Adjust the multiplier as needed to position the label
+            
+            # Invert the sign of 'diferenca' and set color to red (or green for the last element)
+            if index == 0:
+                label_diff = '+' + str(abs(width_diff))
+                color_diff = 'green'
+            else:
+                label_diff = '-' + str(abs(width_diff))
+                color_diff = 'red'
+            
+            # Add text label for 'diferenca' outside the bar segment
+            axs[1].text(label_x_pos_diff, index, label_diff, color=color_diff, ha='left', va='center')
+
+    axs[1].set_xlabel('Mandatos por distrito')
+    axs[1].set_title('Círculo de Compensação')
+    fig.suptitle(eleicao)
+    fig.savefig(f'plots\\reorg_mandatos_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
+
+    
+    # Votos perdidos por distrito
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    df_distritos = df_distritos[~df_distritos.index.isin(['Compensação'])]
+    df_distritos.rename(index = mapping_distritos, inplace = True)
+    axs[0].barh(df_distritos.index, df_distritos['votos_perdidos'])
+    axs[0].set_xlabel('Votos perdidos por distrito')
+    axs[0].set_title('Atual')
+    axs[1].barh(df_distritos.index, df_distritos['votos_perdidos_cc'])
+    axs[1].set_xlabel('Votos perdidos por distrito')
+    axs[1].set_title('Círculo de Compensação')
+    xlim = np.ceil(np.max(df_distritos['votos_perdidos'])/10000)*10000
+    plt.setp(axs[0], xlim=(0,xlim))
+    plt.setp(axs[1], xlim=(0,xlim))
+    fig.suptitle(eleicao)
+    fig.savefig(f'plots\\votos_perdidos_distrito_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
+
+    df_merge_votos.to_csv(f'simulacoes\\votos_perdidos_partido_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
+    df_reorganizacao_mandatos.to_csv(f'simulacoes\\reorganizacao_mandatos_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
+    df_distritos.to_csv(f'simulacoes\\votos_perdidos_distrito_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
+
+    return 0
+
+# Simular resultados de uma eleição dada uma lista de tamanhos de círculo de compensação
 def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros):
 
     df_desvios = pd.DataFrame(columns = ['circulo_compensacao', 'desvio_proporcionalidade', 'votos_perdidos'])
@@ -232,14 +434,20 @@ def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_mi
     # Guardar resultados
     if(len(lista_tamanhos_cc)==1):
         df_simulacao.to_csv(f'simulacoes\\simulacao_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
+        plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, lista_tamanhos_cc)
     else:
         df_desvios.to_csv(f'simulacoes\\desvios_{eleicao}.csv')
         plot_desvios(df_desvios, eleicao)
 
-    return 0
+    return df_perdidos
+
+# Convert numbers to 'k' format
+def format_k(x):
+    return f"{x/1000:.0f}k" if x >= 1000 else str(x)
 
 # Simular todas as eleicoes
-def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231), incluir_estrangeiro = True):
+def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231), incluir_estrangeiros = True):
+    total_perdidos = pd.DataFrame(columns = ['ano', 'votos_perdidos', 'votos_perdidos_cc'])
     for ficheiro in eleicoes:
         #ficheiro = eleicoes[0]
         eleicao = os.path.splitext(ficheiro)[0]
@@ -249,32 +457,58 @@ def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231), in
         df_total = obter_base(path, ano)
         df_mandatos = obter_mandatos(df_total)
         df_votos = obter_votos(df_total)
-        erro = simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiro)
+        df_perdidos  = simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
+        sum(df_votos.loc[(df_votos['mandatos'] == 0)]['votos'])
+        total_perdidos.loc[len(total_perdidos)] = [ano
+                                                   , sum(df_votos.loc[(df_votos['mandatos'] == 0)&(~df_votos['partido'].isin(['brancos','nulos']))]['votos'])
+                                                   , sum(df_perdidos['votos'])]        
         plt.close('all')
 
-    return erro
+    if(len(lista_tamanhos_cc)==1):
+        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+        # Plot the bars and add data labels
+        for i, label in enumerate(['votos_perdidos', 'votos_perdidos_cc']):
+            axs[i].bar(total_perdidos['ano'], total_perdidos[label], color='red' if label == 'votos_perdidos' else 'blue')
+            axs[i].set_xlabel('Ano')
+            axs[i].set_title('Atual' if label == 'votos_perdidos' else 'Se houvesse Círculo de Compensação')
+
+            # Add data labels
+            for x, y in zip(total_perdidos['ano'], total_perdidos[label]):
+                axs[i].text(x, y, format_k(y), ha='center', va='bottom', fontsize=8)
+
+        ylim = np.ceil(np.max(total_perdidos['votos_perdidos'])/100000)*100000
+        plt.setp(axs[0], ylim=(0,ylim))
+        plt.setp(axs[1], ylim=(0,ylim))
+        fig.suptitle('Votos perdidos ao longo dos anos')
+        fig.savefig(f'plots\\votos_perdidos_por_ano_{lista_tamanhos_cc[0]}.jpg')
+        plt.close('all')
+
+    return 0
 
 
 # Mínimo de mandatos por círculo distrital
 tamanho_circulo_minimo = 2
 
 # Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação?
-incluir_estrangeiros = False
+incluir_estrangeiros = True
 
 # simulação não pode retirar mais deputados do que o mínimo 
 tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
 
 # Simular sequência de tamanhos do círculo de compensação (min, max+1, [step])
-lista_tamanhos_cc = range(0, tamanho_maximo_circulo_compensacao+1, 1)
+#lista_tamanhos_cc = range(0, tamanho_maximo_circulo_compensacao+1, 1)
 
 ## OU ##
 
 # Simular um tamanho
-#lista_tamanhos_cc = [28]
+lista_tamanhos_cc = [40]
 
 # Listar eleições a simular
 eleicoes = os.listdir('eleicoes')
-#eleicoes = [eleicoes[6]]
+eleicoes.pop(5)
+#eleicoes = []
 
 if __name__ == "__main__":
    main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc, incluir_estrangeiros)
+
+
