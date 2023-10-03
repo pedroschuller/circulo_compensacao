@@ -34,6 +34,7 @@ mapping_distritos = {'Castelo Branco':'C. Branco',
 cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 'orange', 'cyan', 'cyan', 'blue', 'darkblue', 'red', 'darkblue', 'yellow', 'red']
 df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
+
 # Limpar dados base
 def obter_base(path, ano):
     sheet_nacional = f'AR_{ano}_Distrito_Reg.Autónoma' 
@@ -319,14 +320,28 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     # Votos que não serviram para eleger por partido
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-    df_merge_votos.sort_values(['%votos_nao_convertidos', 'votos'], ascending = [False, True], inplace = True)
+    df_merge_votos.sort_values(['%votos_nao_convertidos', 'votos'], ascending=[False, True], inplace=True)
     hbar_colors = cores_usar.reindex(df_merge_votos.index.values)
-    axs[0].barh(df_merge_votos.index, df_merge_votos['%votos_nao_convertidos'], color = hbar_colors)
-    axs[0].set_xlabel('Votos não convertidos em cada partido (%)')
-    axs[0].set_title('Atual')
-    axs[1].barh(df_merge_votos.index, df_merge_votos['%votos_nao_convertidos_cc'], color = hbar_colors)
-    axs[1].set_xlabel('Votos não convertidos em cada partido (%)')
-    axs[1].set_title('Círculo de Compensação')
+
+    # Define the columns and titles to iterate over
+    columns = ['%votos_nao_convertidos', '%votos_nao_convertidos_cc']
+    titles = ['Atual', 'Círculo de Compensação']
+
+    # Iterate over the columns and titles to create the subplots
+    for i, (col, title) in enumerate(zip(columns, titles)):
+        bars = axs[i].barh(df_merge_votos.index, df_merge_votos[col], color=hbar_colors)
+        axs[i].set_xlabel('Votos não convertidos em cada partido (%)')
+        axs[i].set_title(title)
+
+        # Add percentage labels to bars
+        for bar in bars:
+            width = bar.get_width()
+            label_x_pos = width if width <= 50 else width - 5  # Adjust the offset as needed
+            label_color = 'black' if width <= 50 else 'white'
+            axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:.1f}%', 
+                        color=label_color, va='center', ha='right' if width <= 50 else 'left')
+
+
     fig.suptitle(eleicao)
     fig.savefig(f'plots\\votos_nao_convertidos_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
 
@@ -335,13 +350,25 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_merge_votos.sort_values(['votos_por_deputado', 'votos'], ascending = [False, True], inplace = True)
-    hbar_colors = cores_usar.reindex(df_merge_votos.index.values)
-    axs[0].barh(df_merge_votos.index, df_merge_votos['votos_por_deputado'], color = hbar_colors)
-    axs[0].set_xlabel('Votos necessários para eleger um deputado')
-    axs[0].set_title('Atual')
-    axs[1].barh(df_merge_votos.index, df_merge_votos['votos_por_deputado_cc'], color = hbar_colors)
-    axs[1].set_xlabel('Votos necessários para eleger um deputado')
-    axs[1].set_title('Círculo de Compensação')
+
+    # Define the columns and titles to iterate over
+    columns = ['votos_por_deputado', 'votos_por_deputado_cc']
+
+    # Iterate over the columns and titles to create the subplots
+    for i, (col, title) in enumerate(zip(columns, titles)):
+        bars = axs[i].barh(df_merge_votos.index, df_merge_votos[col], color=hbar_colors)
+        axs[i].set_xlabel('Votos necessários para eleger um deputado')
+        axs[i].set_title(title)
+
+        # Add labels with thousands separator to bars
+        for bar in bars:
+            width = bar.get_width()
+            label_x_pos = width if width <= 0.5 * axs[i].get_xlim()[1] else width - 0.05 * axs[i].get_xlim()[1]  # Adjust the offset as needed
+            label_color = 'black' if width <= 0.5 * axs[i].get_xlim()[1] else 'white'
+            axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:,.0f}', 
+                        color=label_color, va='center', ha='right' if width <= 0.5 * axs[i].get_xlim()[1] else 'left')
+
+
     fig.suptitle(eleicao)
     fig.savefig(f'plots\\votos_por_deputado_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
 
@@ -397,15 +424,29 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
     
     # Votos perdidos por distrito
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_distritos = df_distritos[~df_distritos.index.isin(['Compensação'])]
     df_distritos.rename(index = mapping_distritos, inplace = True)
-    axs[0].barh(df_distritos.index, df_distritos['votos_perdidos'])
-    axs[0].set_xlabel('Votos perdidos por distrito')
-    axs[0].set_title('Atual')
-    axs[1].barh(df_distritos.index, df_distritos['votos_perdidos_cc'])
-    axs[1].set_xlabel('Votos perdidos por distrito')
-    axs[1].set_title('Círculo de Compensação')
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+
+    # Define the columns and titles to iterate over
+    columns = ['votos_perdidos', 'votos_perdidos_cc']
+
+    # Iterate over the columns and titles to create the subplots
+    for i, (col, title) in enumerate(zip(columns, titles)):
+        bars = axs[i].barh(df_distritos.index, df_distritos[col])
+        axs[i].set_xlabel('Votos perdidos por distrito')
+        axs[i].set_title(title)
+            
+        # Add labels with 'k' format to bars
+        for bar in bars:
+            width = bar.get_width()
+            label_x_pos = width if width <= 0.5 * axs[i].get_xlim()[1] else width - 0.05 * axs[i].get_xlim()[1]  # Adjust the offset as needed
+            label_color = 'black' if width <= 0.5 * axs[i].get_xlim()[1] else 'white'
+            axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width/1000:.0f}k', 
+                        color=label_color, va='center', ha='right' if width <= 0.5 * axs[i].get_xlim()[1] else 'left')
+
+
     xlim = np.ceil(np.max(df_distritos['votos_perdidos'])/10000)*10000
     plt.setp(axs[0], xlim=(0,xlim))
     plt.setp(axs[1], xlim=(0,xlim))
@@ -417,6 +458,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     df_distritos.to_csv(f'simulacoes\\votos_perdidos_distrito_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
 
     return 0
+
 
 # Simular resultados de uma eleição dada uma lista de tamanhos de círculo de compensação
 def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros):
@@ -440,9 +482,11 @@ def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_mi
 
     return df_perdidos
 
+
 # Convert numbers to 'k' format
 def format_k(x):
     return f"{x/1000:.0f}k" if x >= 1000 else str(x)
+
 
 # Simular todas as eleicoes
 def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231), incluir_estrangeiros = True):
@@ -504,10 +548,8 @@ lista_tamanhos_cc = [40]
 
 # Listar eleições a simular
 eleicoes = os.listdir('eleicoes')
-eleicoes.pop(5)
+#eleicoes.pop(5)
 #eleicoes = []
 
 if __name__ == "__main__":
    main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc, incluir_estrangeiros)
-
-
