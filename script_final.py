@@ -548,7 +548,7 @@ lista_tamanhos_cc = [40]
 
 # Listar eleições a simular
 eleicoes = os.listdir('eleicoes')
-#eleicoes.pop(5)
+eleicoes.pop(5)
 #eleicoes = []
 
 if __name__ == "__main__":
