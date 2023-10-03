@@ -1,2 +1,4 @@
 pandas
 pyjanitor
+matplotlib
+numpy
