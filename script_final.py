@@ -336,10 +336,10 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
         # Add percentage labels to bars
         for bar in bars:
             width = bar.get_width()
-            label_x_pos = width if width <= 50 else width - 5  # Adjust the offset as needed
-            label_color = 'black' if width <= 50 else 'white'
+            label_x_pos = width + 15 if width <= 75 else width - 15 # Adjust the offset as needed
+            label_color = 'black' if width <= 75 else 'white'
             axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:.1f}%', 
-                        color=label_color, va='center', ha='right' if width <= 50 else 'left')
+                        color=label_color, va='center', ha='right' if width <= 75 else 'left')
 
 
     fig.suptitle(eleicao)
@@ -363,7 +363,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
         # Add labels with thousands separator to bars
         for bar in bars:
             width = bar.get_width()
-            label_x_pos = width if width <= 0.5 * axs[i].get_xlim()[1] else width - 0.05 * axs[i].get_xlim()[1]  # Adjust the offset as needed
+            label_x_pos = width + 0.13 * axs[i].get_xlim()[1] if width <= 0.5 * axs[i].get_xlim()[1] else width - 0.165 * axs[i].get_xlim()[1]  # Adjust the offset as needed
             label_color = 'black' if width <= 0.5 * axs[i].get_xlim()[1] else 'white'
             axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:,.0f}', 
                         color=label_color, va='center', ha='right' if width <= 0.5 * axs[i].get_xlim()[1] else 'left')
@@ -441,10 +441,10 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
         # Add labels with 'k' format to bars
         for bar in bars:
             width = bar.get_width()
-            label_x_pos = width if width <= 0.5 * axs[i].get_xlim()[1] else width - 0.05 * axs[i].get_xlim()[1]  # Adjust the offset as needed
-            label_color = 'black' if width <= 0.5 * axs[i].get_xlim()[1] else 'white'
+            label_x_pos = width + 5000   # Adjust the offset as needed
+            label_color = 'black'
             axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width/1000:.0f}k', 
-                        color=label_color, va='center', ha='right' if width <= 0.5 * axs[i].get_xlim()[1] else 'left')
+                        color=label_color, va='center', ha='right')
 
 
     xlim = np.ceil(np.max(df_distritos['votos_perdidos'])/10000)*10000
