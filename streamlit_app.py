@@ -425,8 +425,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
         axs[i].set_title('Atual' if label == 'votos_perdidos' else 'Se houvesse Círculo de Compensação')
 
         # Add data labels
-        for x, y in zip(eleicao, sum(df_merge_votos[label])):
-            axs[i].text(x, y, format_k(y), ha='center', va='bottom', fontsize=8)
+        axs[i].text(eleicao, sum(df_merge_votos[label]), format_k(sum(df_merge_votos[label])), ha='center', va='bottom', fontsize=8)
 
     ylim = np.ceil(sum(df_merge_votos['votos_perdidos'])/100000)*100000
     plt.setp(axs[0], ylim=(0,ylim))
