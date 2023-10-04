@@ -246,7 +246,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     plot_hemiciclo(axs[0], df_merge_votos['mandatos'][cores_usar.index], df_merge_votos['votos'][cores_usar.index], cores_usar.values, 'Atual', cores_usar.index)
     plot_hemiciclo(axs[1], df_merge_votos['mandatos_cc'][cores_usar.index], df_merge_votos['votos'][cores_usar.index], cores_usar.values, 'Com Círculo de Compensação', cores_usar.index)
-    fig.suptitle(eleicao)
+    fig.suptitle("Como ficaria o parlamento?")
     st.pyplot(fig)
 
     # Votos que não serviram para eleger por partido
@@ -274,7 +274,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
                         color=label_color, va='center', ha='right' if width <= 75 else 'left')
 
 
-    fig.suptitle(eleicao)
+    fig.suptitle("Que percentagem de votos, por partido, não servem para nada?")
     st.pyplot(fig)
 
     # Votos para eleger um deputado por partido
@@ -300,7 +300,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
                         color=label_color, va='center', ha='right' if width <= 0.5 * axs[i].get_xlim()[1] else 'left')
 
 
-    fig.suptitle(eleicao)
+    fig.suptitle("Quantos votos seriam necessários para eleger um deputado?")
     st.pyplot(fig)
 
 
@@ -350,7 +350,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
     axs[1].set_xlabel('Mandatos por distrito')
     axs[1].set_title('Círculo de Compensação')
-    fig.suptitle(eleicao)
+    fig.suptitle("Como ficariam os círculos eleitorais?")
     st.pyplot(fig)
 
     
@@ -381,7 +381,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     xlim = np.ceil(np.max(df_distritos['votos_perdidos'])/10000)*10000
     plt.setp(axs[0], xlim=(0,xlim))
     plt.setp(axs[1], xlim=(0,xlim))
-    fig.suptitle(eleicao)
+    fig.suptitle("Quantos votos não servem para eleger ninguém, por distrito?")
     st.pyplot(fig)
 
 
@@ -412,7 +412,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     plt.setp(axs[0], xlim=(0,100))
     plt.setp(axs[1], xlim=(0,100))
 
-    fig.suptitle(eleicao)
+    fig.suptitle("Que percentagem de votos não serve para eleger ninguém, por distrito?")
     st.pyplot(fig)
     return 0
 
@@ -465,12 +465,16 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
     ylim = np.ceil(np.max(total_perdidos['votos_perdidos'])/100000)*100000
     plt.setp(axs[0], ylim=(0,ylim))
     plt.setp(axs[1], ylim=(0,ylim))
-    fig.suptitle('Votos perdidos ao longo dos anos')
+    fig.suptitle('Quantos votos se perdem, no total?')
     st.pyplot(fig)
 
 
     return 0
 
+# Listar eleições a simular
+eleicao = st.selectbox(
+    'Que eleição deseja simular?',
+    ('2005', '2009', '2011', '2015', '2019', '2022'))
 
 # Mínimo de mandatos por círculo distrital
 tamanho_circulo_minimo = 2
@@ -481,13 +485,8 @@ incluir_estrangeiros = True
 # simulação não pode retirar mais deputados do que o mínimo 
 tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
 
-# Listar eleições a simular
-eleicao = st.selectbox(
-    'Que eleição deseja simular?',
-    ('2005', '2009', '2011', '2015', '2019', '2022'))
-
 # Simular um tamanho
-tamanho_cc = st.slider('Número de deputados no círculo de compensação nacional', 0, tamanho_maximo_circulo_compensacao)
+tamanho_cc = st.slider('Número de deputados no círculo de compensação nacional', 0, tamanho_maximo_circulo_compensacao, 40)
 
 if __name__ == "__main__":
    main(eleicao, tamanho_circulo_minimo, tamanho_cc, incluir_estrangeiros)
