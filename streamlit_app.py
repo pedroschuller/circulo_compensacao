@@ -441,7 +441,7 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
 
     total_perdidos = pd.DataFrame(columns = ['ano', 'votos_perdidos', 'votos_perdidos_cc'])
     print(eleicao)
-    path = f'.\eleicoes\\{eleicao}'
+    path = f'./eleicoes//{eleicao}'
     ano = re.search('\d{4}', eleicao)[0]
     df_total = obter_base(path, ano)
     df_mandatos = obter_mandatos(df_total)
