@@ -477,7 +477,7 @@ eleicao = st.selectbox(
 tamanho_circulo_minimo = 2
 
 # Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação?
-incluir_estrangeiros = st.toggle('Votos nosírculos eleitorais internacionais contam para o círculo nacional de compensação?', value = True)
+incluir_estrangeiros = st.toggle('Votos nos círculos eleitorais internacionais contam para o círculo nacional de compensação?', value = True)
 
 # simulação não pode retirar mais deputados do que o mínimo 
 tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
