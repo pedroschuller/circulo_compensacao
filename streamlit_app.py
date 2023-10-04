@@ -441,7 +441,7 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
 
     total_perdidos = pd.DataFrame(columns = ['ano', 'votos_perdidos', 'votos_perdidos_cc'])
     print(eleicao)
-    path = f'eleicoes\\{eleicao}'
+    path = f'.\eleicoes\\{eleicao}'
     ano = re.search('\d{4}', eleicao)[0]
     df_total = obter_base(path, ano)
     df_mandatos = obter_mandatos(df_total)
@@ -484,7 +484,7 @@ tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tam
 
 # Listar eleições a simular
 eleicao = st.selectbox(
-    'How would you like to be contacted?',
+    'Que eleição deseja simular?',
     ('AR_2005_Globais.xlsx', 'AR_2009_Globais.xlsx', 'AR_2011_Globais.xlsx', 'AR_2015_Globais.xlsx', 'AR_2019_Globais.xlsx', 'AR_2022_Globais_REPEU.xlsx'))
 
 
