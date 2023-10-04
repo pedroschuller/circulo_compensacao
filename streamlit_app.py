@@ -467,9 +467,7 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
     plt.setp(axs[1], ylim=(0,ylim))
     fig.suptitle('Quantos votos se perdem, no total?')
     st.pyplot(fig)
-
-
-    return 0
+    
 
 # Listar eleições a simular
 eleicao = st.selectbox(
