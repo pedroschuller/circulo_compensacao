@@ -23,7 +23,11 @@ mapping_partidos = {'E':'PNR',
                     'PCTP/MRPP':'MRPP'}
 
 # Partidos da esquerda para a direita (discutível mas suficiente)
-ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', 'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', 'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', 'PPD/PSD', 'IL', 'A', 'CDS-PP', 'PPM', 'PND', 'CH', 'ADN', 'PNR']
+ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
+                  'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
+                  'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
+                  'PPD/PSD', 'IL', 'A', 'CDS-PP', 'PPM', #centro-direita
+                  'PND', 'CH', 'ADN', 'PNR'] #direita
 
 # Abreviar distritos para o plot
 mapping_distritos = {'Castelo Branco':'C. Branco',
@@ -434,7 +438,6 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     st.pyplot(fig)
 
 
-
 # Simular resultados de uma eleição dada uma lista de tamanhos de círculo de compensação
 def simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros):
 
@@ -474,7 +477,7 @@ eleicao = st.selectbox(
 tamanho_circulo_minimo = 2
 
 # Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação?
-incluir_estrangeiros = True
+incluir_estrangeiros = st.toggle('Votos nosírculos eleitorais internacionais contam para o círculo nacional de compensação?', value = True)
 
 # simulação não pode retirar mais deputados do que o mínimo 
 tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
