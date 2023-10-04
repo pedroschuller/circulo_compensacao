@@ -2,4 +2,3 @@ pandas
 pyjanitor
 matplotlib
 numpy
-openpyxl
