@@ -453,6 +453,37 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     fig.suptitle(eleicao)
     fig.savefig(f'plots\\votos_perdidos_distrito_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
 
+
+    # Votos perdidos (em percentagem) por distrito
+    df_distritos['%votos_perdidos'] = 100.0*df_distritos['votos_perdidos']/df_distritos['votos']
+    df_distritos['%votos_perdidos_cc'] = 100.0*df_distritos['votos_perdidos_cc']/df_distritos['votos']
+    df_distritos.sort_values(['%votos_perdidos'], inplace=True)
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+
+    # Define the columns and titles to iterate over
+    columns = ['%votos_perdidos', '%votos_perdidos_cc']
+
+    # Iterate over the columns and titles to create the subplots
+    for i, (col, title) in enumerate(zip(columns, titles)):
+        bars = axs[i].barh(df_distritos.index, df_distritos[col])
+        axs[i].set_xlabel('Votos perdidos por distrito (%)')
+        axs[i].set_title(title)
+            
+        # Add labels with 'k' format to bars
+        for bar in bars:
+            width = bar.get_width()
+            label_x_pos = width + 15 if width <= 75 else width - 15 # Adjust the offset as needed
+            label_color = 'black' if width <= 75 else 'white'
+            axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:.1f}%', 
+                        color=label_color, va='center', ha='right' if width <= 75 else 'left')
+    
+    plt.setp(axs[0], xlim=(0,100))
+    plt.setp(axs[1], xlim=(0,100))
+
+    fig.suptitle(eleicao)
+    fig.savefig(f'plots\\votos_perdidos_perc_distrito_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
+
     df_merge_votos.to_csv(f'simulacoes\\votos_perdidos_partido_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
     df_reorganizacao_mandatos.to_csv(f'simulacoes\\reorganizacao_mandatos_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
     df_distritos.to_csv(f'simulacoes\\votos_perdidos_distrito_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
@@ -525,6 +556,11 @@ def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231), in
         fig.suptitle('Votos perdidos ao longo dos anos')
         fig.savefig(f'plots\\votos_perdidos_por_ano_{lista_tamanhos_cc[0]}.jpg')
         plt.close('all')
+
+        total_perdidos.to_csv(f'simulacoes\\votos_perdidos_por_ano_{lista_tamanhos_cc[0]}.csv')
+
+
+
 
     return 0
 
