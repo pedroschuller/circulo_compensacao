@@ -7,6 +7,7 @@ import os
 import re
 import numpy as np
 import streamlit as st
+import openpyxl
 
 
 #Substituir coligações, fusões ou rebrandings pelo maior partido (simplificação)
