@@ -414,7 +414,6 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
     fig.suptitle("Que percentagem de votos não serve para eleger ninguém, por distrito?")
     st.pyplot(fig)
-    return 0
 
 
 # Simular resultados de uma eleição dada uma lista de tamanhos de círculo de compensação
@@ -441,7 +440,6 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
 
     total_perdidos = pd.DataFrame(columns = ['ano', 'votos_perdidos', 'votos_perdidos_cc'])
 
-    print(eleicao)
     df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
     df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
 
@@ -467,7 +465,7 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
     plt.setp(axs[1], ylim=(0,ylim))
     fig.suptitle('Quantos votos se perdem, no total?')
     st.pyplot(fig)
-    
+
 
 # Listar eleições a simular
 eleicao = st.selectbox(
