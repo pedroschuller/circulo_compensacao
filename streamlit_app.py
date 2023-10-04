@@ -8,6 +8,10 @@ import re
 import numpy as np
 import streamlit as st
 
+# Configs streamlit
+st.set_page_config(page_title="Círculo de Compensação Nacional")
+st.title("Círculo de Compensação Nacional")
+st.header("Simulação da introdução de um mecanismo de compensação nas eleições legislativas")
 
 #Substituir coligações, fusões ou rebrandings pelo maior partido (simplificação)
 mapping_partidos = {'E':'PNR',
