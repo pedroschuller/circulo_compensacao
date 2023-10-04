@@ -7,7 +7,6 @@ import os
 import re
 import numpy as np
 import streamlit as st
-import openpyxl
 
 
 #Substituir coligações, fusões ou rebrandings pelo maior partido (simplificação)
@@ -441,15 +440,14 @@ def format_k(x):
 def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_estrangeiros = True):
 
     total_perdidos = pd.DataFrame(columns = ['ano', 'votos_perdidos', 'votos_perdidos_cc'])
+
     print(eleicao)
-    path = f'./eleicoes//{eleicao}'
-    ano = re.search('\d{4}', eleicao)[0]
-    df_total = obter_base(path, ano)
-    df_mandatos = obter_mandatos(df_total)
-    df_votos = obter_votos(df_total)
+    df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
+    df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
+
     df_perdidos  = simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
 
-    total_perdidos.loc[len(total_perdidos)] = [ano
+    total_perdidos.loc[len(total_perdidos)] = [eleicao
                                                 , sum(df_votos.loc[(df_votos['mandatos'] == 0)&(~df_votos['partido'].isin(['brancos','nulos']))]['votos'])
                                                 , sum(df_perdidos['votos'])]        
 
@@ -486,8 +484,7 @@ tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tam
 # Listar eleições a simular
 eleicao = st.selectbox(
     'Que eleição deseja simular?',
-    ('AR_2005_Globais.xlsx', 'AR_2009_Globais.xlsx', 'AR_2011_Globais.xlsx', 'AR_2015_Globais.xlsx', 'AR_2019_Globais.xlsx', 'AR_2022_Globais_REPEU.xlsx'))
-
+    ('2005', '2009', '2011', '2015', '2019', '2022'))
 
 # Simular um tamanho
 tamanho_cc = st.slider('Número de deputados no círculo de compensação nacional', 0, tamanho_maximo_circulo_compensacao)
