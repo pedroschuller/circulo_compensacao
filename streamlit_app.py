@@ -253,6 +253,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_merge_votos.sort_values(['votos_por_deputado', 'votos'], ascending = [False, True], inplace = True)
+    hbar_colors = cores_usar.reindex(df_merge_votos.index.values)
 
     # Define the columns and titles to iterate over
     titles = ['Atual', 'Círculo de Compensação']
@@ -393,7 +394,6 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_merge_votos.sort_values(['%votos_nao_convertidos', 'votos'], ascending=[False, True], inplace=True)
-    hbar_colors = cores_usar.reindex(df_merge_votos.index.values)
 
     # Define the columns and titles to iterate over
     columns = ['%votos_nao_convertidos', '%votos_nao_convertidos_cc']
