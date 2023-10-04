@@ -412,10 +412,27 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
             axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:.1f}%', 
                         color=label_color, va='center', ha='right' if width <= 75 else 'left')
 
-
     fig.suptitle("Que percentagem de votos, por partido, não servem para nada?")
     st.pyplot(fig)
 
+     
+    # Total de votos perdidos
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    # Plot the bars and add data labels
+    for i, label in enumerate(['votos_perdidos', 'votos_perdidos_cc']):
+        axs[i].bar(eleicao, sum(df_merge_votos[label]), color='red' if label == 'votos_perdidos' else 'blue')
+        axs[i].set_xlabel('Ano')
+        axs[i].set_title('Atual' if label == 'votos_perdidos' else 'Se houvesse Círculo de Compensação')
+
+        # Add data labels
+        for x, y in zip(eleicao, sum(df_merge_votos[label])):
+            axs[i].text(x, y, format_k(y), ha='center', va='bottom', fontsize=8)
+
+    ylim = np.ceil(sum(df_merge_votos['votos_perdidos'])/100000)*100000
+    plt.setp(axs[0], ylim=(0,ylim))
+    plt.setp(axs[1], ylim=(0,ylim))
+    fig.suptitle('Quantos votos se perdem, no total?')
+    st.pyplot(fig)
 
 
 
@@ -441,33 +458,12 @@ def format_k(x):
 # Simular 
 def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_estrangeiros = True):
 
-    total_perdidos = pd.DataFrame(columns = ['ano', 'votos_perdidos', 'votos_perdidos_cc'])
-
     df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
     df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
 
     df_perdidos  = simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
 
-    total_perdidos.loc[len(total_perdidos)] = [eleicao
-                                                , sum(df_votos.loc[(df_votos['mandatos'] == 0)&(~df_votos['partido'].isin(['brancos','nulos']))]['votos'])
-                                                , sum(df_perdidos['votos'])]        
-
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-    # Plot the bars and add data labels
-    for i, label in enumerate(['votos_perdidos', 'votos_perdidos_cc']):
-        axs[i].bar(total_perdidos['ano'], total_perdidos[label], color='red' if label == 'votos_perdidos' else 'blue')
-        axs[i].set_xlabel('Ano')
-        axs[i].set_title('Atual' if label == 'votos_perdidos' else 'Se houvesse Círculo de Compensação')
-
-        # Add data labels
-        for x, y in zip(total_perdidos['ano'], total_perdidos[label]):
-            axs[i].text(x, y, format_k(y), ha='center', va='bottom', fontsize=8)
-
-    ylim = np.ceil(np.max(total_perdidos['votos_perdidos'])/100000)*100000
-    plt.setp(axs[0], ylim=(0,ylim))
-    plt.setp(axs[1], ylim=(0,ylim))
-    fig.suptitle('Quantos votos se perdem, no total?')
-    st.pyplot(fig)
+  
 
 
 # Listar eleições a simular
