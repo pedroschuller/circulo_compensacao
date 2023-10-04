@@ -237,7 +237,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
     df_reorganizacao_mandatos = pd.merge(df_mandatos[['distrito', 'mandatos']], right = df_reduzido[['distrito', 'mandatos']], on = 'distrito', suffixes=('', '_cc'))
     df_reorganizacao_mandatos['diferenca'] = df_reorganizacao_mandatos.mandatos - df_reorganizacao_mandatos.mandatos_cc
-    df_reorganizacao_mandatos.loc[len(df_reorganizacao_mandatos)] = ['Compensação', 0, 0, tamanho_cc[0]]
+    df_reorganizacao_mandatos.loc[len(df_reorganizacao_mandatos)] = ['Compensação', 0, 0, tamanho_cc]
 
 
     # Hemiciclo
