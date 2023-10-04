@@ -249,40 +249,13 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     fig.suptitle("Como ficaria o parlamento?")
     st.pyplot(fig)
 
-    # Votos que não serviram para eleger por partido
-
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-    df_merge_votos.sort_values(['%votos_nao_convertidos', 'votos'], ascending=[False, True], inplace=True)
-    hbar_colors = cores_usar.reindex(df_merge_votos.index.values)
-
-    # Define the columns and titles to iterate over
-    columns = ['%votos_nao_convertidos', '%votos_nao_convertidos_cc']
-    titles = ['Atual', 'Círculo de Compensação']
-
-    # Iterate over the columns and titles to create the subplots
-    for i, (col, title) in enumerate(zip(columns, titles)):
-        bars = axs[i].barh(df_merge_votos.index, df_merge_votos[col], color=hbar_colors)
-        axs[i].set_xlabel('Votos não convertidos em cada partido (%)')
-        axs[i].set_title(title)
-
-        # Add percentage labels to bars
-        for bar in bars:
-            width = bar.get_width()
-            label_x_pos = width + 15 if width <= 75 else width - 15 # Adjust the offset as needed
-            label_color = 'black' if width <= 75 else 'white'
-            axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:.1f}%', 
-                        color=label_color, va='center', ha='right' if width <= 75 else 'left')
-
-
-    fig.suptitle("Que percentagem de votos, por partido, não servem para nada?")
-    st.pyplot(fig)
-
     # Votos para eleger um deputado por partido
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_merge_votos.sort_values(['votos_por_deputado', 'votos'], ascending = [False, True], inplace = True)
 
     # Define the columns and titles to iterate over
+    titles = ['Atual', 'Círculo de Compensação']
     columns = ['votos_por_deputado', 'votos_por_deputado_cc']
 
     # Iterate over the columns and titles to create the subplots
@@ -354,38 +327,10 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     st.pyplot(fig)
 
     
-    # Votos perdidos por distrito
-    df_distritos = df_distritos[~df_distritos.index.isin(['Compensação'])]
-    df_distritos.rename(index = mapping_distritos, inplace = True)
-
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-
-    # Define the columns and titles to iterate over
-    columns = ['votos_perdidos', 'votos_perdidos_cc']
-
-    # Iterate over the columns and titles to create the subplots
-    for i, (col, title) in enumerate(zip(columns, titles)):
-        bars = axs[i].barh(df_distritos.index, df_distritos[col])
-        axs[i].set_xlabel('Votos perdidos por distrito')
-        axs[i].set_title(title)
-            
-        # Add labels with 'k' format to bars
-        for bar in bars:
-            width = bar.get_width()
-            label_x_pos = width + 5000   # Adjust the offset as needed
-            label_color = 'black'
-            axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width/1000:.0f}k', 
-                        color=label_color, va='center', ha='right')
-
-
-    xlim = np.ceil(np.max(df_distritos['votos_perdidos'])/10000)*10000
-    plt.setp(axs[0], xlim=(0,xlim))
-    plt.setp(axs[1], xlim=(0,xlim))
-    fig.suptitle("Quantos votos não servem para eleger ninguém, por distrito?")
-    st.pyplot(fig)
-
 
     # Votos perdidos (em percentagem) por distrito
+    df_distritos = df_distritos[~df_distritos.index.isin(['Compensação'])]
+    df_distritos.rename(index = mapping_distritos, inplace = True)
     df_distritos['%votos_perdidos'] = 100.0*df_distritos['votos_perdidos']/df_distritos['votos']
     df_distritos['%votos_perdidos_cc'] = 100.0*df_distritos['votos_perdidos_cc']/df_distritos['votos']
     df_distritos.sort_values(['%votos_perdidos'], inplace=True)
@@ -414,6 +359,64 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
     fig.suptitle("Que percentagem de votos não serve para eleger ninguém, por distrito?")
     st.pyplot(fig)
+
+
+    # Votos perdidos por distrito
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+
+    # Define the columns and titles to iterate over
+    columns = ['votos_perdidos', 'votos_perdidos_cc']
+
+    # Iterate over the columns and titles to create the subplots
+    for i, (col, title) in enumerate(zip(columns, titles)):
+        bars = axs[i].barh(df_distritos.index, df_distritos[col])
+        axs[i].set_xlabel('Votos perdidos por distrito')
+        axs[i].set_title(title)
+            
+        # Add labels with 'k' format to bars
+        for bar in bars:
+            width = bar.get_width()
+            label_x_pos = width + 5000   # Adjust the offset as needed
+            label_color = 'black'
+            axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width/1000:.0f}k', 
+                        color=label_color, va='center', ha='right')
+
+
+    xlim = np.ceil(np.max(df_distritos['votos_perdidos'])/10000)*10000
+    plt.setp(axs[0], xlim=(0,xlim))
+    plt.setp(axs[1], xlim=(0,xlim))
+    fig.suptitle("Quantos votos não servem para eleger ninguém, por distrito?")
+    st.pyplot(fig)
+
+
+    # Votos que não serviram para eleger por partido
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    df_merge_votos.sort_values(['%votos_nao_convertidos', 'votos'], ascending=[False, True], inplace=True)
+    hbar_colors = cores_usar.reindex(df_merge_votos.index.values)
+
+    # Define the columns and titles to iterate over
+    columns = ['%votos_nao_convertidos', '%votos_nao_convertidos_cc']
+
+    # Iterate over the columns and titles to create the subplots
+    for i, (col, title) in enumerate(zip(columns, titles)):
+        bars = axs[i].barh(df_merge_votos.index, df_merge_votos[col], color=hbar_colors)
+        axs[i].set_xlabel('Votos não convertidos em cada partido (%)')
+        axs[i].set_title(title)
+
+        # Add percentage labels to bars
+        for bar in bars:
+            width = bar.get_width()
+            label_x_pos = width + 15 if width <= 75 else width - 15 # Adjust the offset as needed
+            label_color = 'black' if width <= 75 else 'white'
+            axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:.1f}%', 
+                        color=label_color, va='center', ha='right' if width <= 75 else 'left')
+
+
+    fig.suptitle("Que percentagem de votos, por partido, não servem para nada?")
+    st.pyplot(fig)
+
+
 
 
 # Simular resultados de uma eleição dada uma lista de tamanhos de círculo de compensação
