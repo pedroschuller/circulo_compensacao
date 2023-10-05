@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import ConnectionPatch
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib import transforms
 import janitor
 import operator
 import os
@@ -269,8 +270,8 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     ab = AnnotationBbox(imagebox, (1.25, 1.03), frameon = False)
     axs[0].add_artist(ab)
     fig.suptitle("Como ficaria o parlamento?")
-
-    st.pyplot(fig)
+    plt.show()
+    st.pyplot(fig, bbox_inches = transforms.Bbox([[0.7, 2.5], [11.5, 6.2],]))
 
     # Votos para eleger um deputado por partido
     st.write("A disparidade no número de votos necessários para eleger um deputado entre diferentes partidos é uma questão preocupante que evidencia falhas no sistema eleitoral, comprometendo a equidade e a justiça representativa. Esta incongruência resulta, muitas vezes, em uma representação parlamentar que não espelha fielmente a vontade do eleitorado. Partidos menores, apesar de receberem um apoio significativo nas urnas, podem encontrar-se sub-representados, necessitando de um número desproporcionalmente elevado de votos para garantir um assento. Por outro lado, partidos maiores podem beneficiar-se deste sistema, obtendo mais assentos do que a proporção de votos recebidos justificaria.")

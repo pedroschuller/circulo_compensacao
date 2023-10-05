@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import ConnectionPatch
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import janitor
 import operator
 import os
@@ -309,11 +310,16 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
     # Hemiciclo
     cores_usar = df_cores[df_cores.index.isin(df_merge_votos.index)]['cor']
-
+    plt.close('all') 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     plot_hemiciclo(axs[0], df_merge_votos['mandatos'][cores_usar.index], df_merge_votos['votos'][cores_usar.index], cores_usar.values, 'Atual', cores_usar.index)
     plot_hemiciclo(axs[1], df_merge_votos['mandatos_cc'][cores_usar.index], df_merge_votos['votos'][cores_usar.index], cores_usar.values, 'Com Círculo de Compensação', cores_usar.index)
     fig.suptitle(eleicao)
+    help = plt.imread('mandatos_votos.png')
+    imagebox = OffsetImage(help, zoom = 0.14)
+    ab = AnnotationBbox(imagebox, (1.25, 1.03), frameon = False)
+    axs[0].add_artist(ab)
+    plt.show()
     fig.savefig(f'plots\\proporcionalidade_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
 
 
@@ -585,7 +591,7 @@ lista_tamanhos_cc = [40]
 # Listar eleições a simular
 eleicoes = os.listdir('eleicoes')
 eleicoes.pop(5)
-#eleicoes = []
+#eleicoes = [eleicoes[5]]
 
 if __name__ == "__main__":
    main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc, incluir_estrangeiros)
