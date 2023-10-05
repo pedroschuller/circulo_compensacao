@@ -281,7 +281,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
             axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:,.0f}', 
                         color=label_color, va='center', ha='right' if width <= 0.5 * axs[i].get_xlim()[1] else 'left')
 
-    xlim = np.ceil(np.max(df_merge_votos['votos_por_deputado'])/10000)*10000
+    xlim = np.ceil(df_merge_votos[['votos_por_deputado', 'votos_por_deputado_cc']].dropna().max().max()/10000)*10000
     plt.setp(axs[0], xlim=(0,xlim))
     plt.setp(axs[1], xlim=(0,xlim))
     fig.suptitle("Quantos votos seriam necessários para eleger um deputado?")
