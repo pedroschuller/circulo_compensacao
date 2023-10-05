@@ -480,7 +480,8 @@ def format_k(x):
 
 # Simular 
 def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_estrangeiros = True):
-
+    
+    eleicao = re.search('\d{4}', eleicao)[0]
     df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
     df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
 
