@@ -490,10 +490,7 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
     st.write("É crucial agir agora para fortalecer a nossa democracia, garantindo que cada voto conta de maneira justa e equitativa. Convidamos todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar a nossa [proposta detalhada no site do Parlamento Português](%s)." % url)
     st.image('./votos_que_contam.png')
     st.divider()
-
-
-
-  
+    st.write('\u00a9 Iniciativa Liberal 2023')  
 
 
 # Listar eleições a simular
