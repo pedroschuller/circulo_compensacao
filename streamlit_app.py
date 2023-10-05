@@ -8,8 +8,6 @@ import re
 import numpy as np
 import streamlit as st
 
-pd.set_option('mode.use_inf_as_na', True)
-
 # Configs streamlit
 st.set_page_config(page_title="Círculo de Compensação Nacional")
 st.title("Círculo de Compensação Nacional")
@@ -283,7 +281,8 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
             axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:,.0f}', 
                         color=label_color, va='center', ha='right' if width <= 0.5 * axs[i].get_xlim()[1] else 'left')
 
-    xlim = np.ceil(df_merge_votos[['votos_por_deputado', 'votos_por_deputado_cc']].dropna().max().max()/10000)*10000
+    with pd.option_context('mode.use_inf_as_na', True):
+        xlim = np.ceil(df_merge_votos[['votos_por_deputado', 'votos_por_deputado_cc']].dropna().max().max()/10000)*10000
     plt.setp(axs[0], xlim=(0,xlim))
     plt.setp(axs[1], xlim=(0,xlim))
     fig.suptitle("Quantos votos seriam necessários para eleger um deputado?")
