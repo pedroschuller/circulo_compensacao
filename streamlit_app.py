@@ -269,6 +269,9 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     titles = ['Atual', 'Círculo de Compensação']
     columns = ['votos_por_deputado', 'votos_por_deputado_cc']
 
+    with pd.option_context('mode.use_inf_as_na', True):
+        xlim = np.ceil(df_merge_votos[['votos_por_deputado', 'votos_por_deputado_cc']].dropna().max().max()/10000)*10000
+
     # Iterate over the columns and titles to create the subplots
     for i, (col, title) in enumerate(zip(columns, titles)):
         bars = axs[i].barh(df_merge_votos.index, df_merge_votos[col], color=hbar_colors)
@@ -278,13 +281,12 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
         # Add labels with thousands separator to bars
         for bar in bars:
             width = bar.get_width()
-            label_x_pos = width + 0.13 * axs[i].get_xlim()[1] if width <= 0.5 * axs[i].get_xlim()[1] else width - 0.165 * axs[i].get_xlim()[1]  # Adjust the offset as needed
-            label_color = 'black' if width <= 0.5 * axs[i].get_xlim()[1] else 'white'
+            label_x_pos = width + 0.13 * xlim if width <= 0.5 * xlim else width - 0.165 * xlim  # Adjust the offset as needed
+            label_color = 'black' if width <= 0.5 * xlim else 'white'
             axs[i].text(label_x_pos, bar.get_y() + bar.get_height()/2, f'{width:,.0f}', 
-                        color=label_color, va='center', ha='right' if width <= 0.5 * axs[i].get_xlim()[1] else 'left')
+                        color=label_color, va='center', ha='right' if width <= 0.5 * xlim else 'left')
 
-    with pd.option_context('mode.use_inf_as_na', True):
-        xlim = np.ceil(df_merge_votos[['votos_por_deputado', 'votos_por_deputado_cc']].dropna().max().max()/10000)*10000
+
     plt.setp(axs[0], xlim=(0,xlim))
     plt.setp(axs[1], xlim=(0,xlim))
     fig.suptitle("Quantos votos seriam necessários para eleger um deputado?")
