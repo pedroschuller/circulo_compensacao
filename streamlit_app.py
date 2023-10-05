@@ -8,6 +8,8 @@ import re
 import numpy as np
 import streamlit as st
 
+pd.set_option('mode.use_inf_as_na', False)
+
 # Configs streamlit
 st.set_page_config(page_title="Círculo de Compensação Nacional")
 st.title("Círculo de Compensação Nacional")
