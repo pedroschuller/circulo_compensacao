@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import ConnectionPatch
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib import transforms
 import janitor
 import operator
 import os
@@ -60,6 +61,20 @@ def obter_base(path, ano):
     return df_total
 
 
+# Limpar dados base
+def obter_base_concelho(path, ano):
+
+    sheet_concelho = f'AR_{ano}_Concelho' 
+
+    df_concelho = pd.read_excel(path, sheet_name=sheet_concelho, skiprows = 3, nrows = 308) 
+
+    # Corrigir nomes
+    df_concelho.rename(columns={"nome do território":"concelho"}, inplace= True)
+    df_concelho = df_concelho.iloc[1:]
+
+    return df_concelho
+
+
 # Mandatos e inscritos por circulo
 def obter_mandatos(df_total): 
     df_base = pd.concat([df_total.iloc[:,0:2],  df_total.iloc[:,6:9], df_total.iloc[:,13]], axis = 1).reset_index(drop = True)
@@ -82,6 +97,22 @@ def obter_votos(df_total):
     df_votos = df_votos.groupby(['código', 'distrito', 'partido']).sum().reset_index()
     
     return df_votos
+
+# Resultados dos partidos, nulos e brancos
+def obter_votos_concelho(df_concelho): 
+    df_votos_concelho = pd.concat([df_concelho.iloc[:,0:2], df_concelho.iloc[:,13:], df_concelho.iloc[:,9:13]], axis = 1).fillna(0)
+    df_votos_concelho = df_votos_concelho.pivot_longer(
+                            index = ['código','concelho']
+                            , names_to = ["partido", "drop1"]
+                            , values_to = ["votos", "% votos"]
+                            , names_pattern = ["^brancos|^nulos|[A-Z]", "% brancos|% nulos|% votantes.*"]
+                        ).drop(columns=['drop1'])
+    
+    df_votos_concelho['partido'].replace(mapping_partidos, inplace = True)
+    df_votos_concelho = df_votos_concelho.groupby(['código', 'concelho', 'partido']).sum().reset_index()
+    df_votos_concelho['codigo_distrito'] = np.where(df_votos_concelho['código']<200000, np.floor(df_votos_concelho['código']/10000).astype(int)*10000, np.floor(df_votos_concelho['código']/100000).astype(int)*100000)
+    
+    return df_votos_concelho
 
 
 # Retirar mandatos aos círculos distritais para o de compensacao
@@ -290,13 +321,17 @@ def plot_hemiciclo(ax, mandatos, votos, cores, title, ordem_partidos):
 
 
 # Desenhar gráficos de comparação entre a situação atual e a introdução de um círculo de compensação
-def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, lista_tamanhos_cc):
+def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, lista_tamanhos_cc, df_votos_concelho):
 
     # Preparar dados
     df_merge_votos = pd.merge(df_votos.dropna(), right = df_simulacao, on = ['código', 'distrito', 'partido'], how = 'right', suffixes = ('', '_cc'))
     df_merge_votos['votos_perdidos'] = np.where(df_merge_votos.mandatos == 0, df_merge_votos.votos, 0)
     df_merge_votos = pd.merge(df_merge_votos, right = df_perdidos, on = ['código', 'distrito', 'partido'], how = 'left', suffixes = ('', '_perdidos_cc')).fillna(0)
     df_distritos = df_merge_votos.groupby(['distrito'])[['votos', 'mandatos', 'mandatos_cc', 'votos_perdidos', 'votos_perdidos_cc']].agg('sum')
+        
+    df_votos_concelho = df_votos_concelho.loc[~df_votos_concelho['partido'].isin(['nulos', 'brancos'])]
+    df_perdidos_concelho = df_merge_votos.merge(df_votos_concelho, left_on=['código', 'partido'], right_on = ['codigo_distrito','partido'], suffixes=('', '_concelho'))
+
     df_merge_votos = df_merge_votos.groupby(['partido'])[['votos', 'mandatos', 'mandatos_cc', 'votos_perdidos', 'votos_perdidos_cc']].agg('sum')
     df_merge_votos['%votos_nao_convertidos'] = 100.0 * df_merge_votos.votos_perdidos / df_merge_votos.votos
     df_merge_votos['%votos_nao_convertidos_cc'] = 100.0 * df_merge_votos.votos_perdidos_cc / df_merge_votos.votos
@@ -306,6 +341,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     df_reorganizacao_mandatos = pd.merge(df_mandatos[['distrito', 'mandatos']], right = df_reduzido[['distrito', 'mandatos']], on = 'distrito', suffixes=('', '_cc'))
     df_reorganizacao_mandatos['diferenca'] = df_reorganizacao_mandatos.mandatos - df_reorganizacao_mandatos.mandatos_cc
     df_reorganizacao_mandatos.loc[len(df_reorganizacao_mandatos)] = ['Compensação', 0, 0, lista_tamanhos_cc[0]]
+
 
 
     # Hemiciclo
@@ -319,8 +355,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     imagebox = OffsetImage(help, zoom = 0.14)
     ab = AnnotationBbox(imagebox, (1.25, 1.03), frameon = False)
     axs[0].add_artist(ab)
-    plt.show()
-    fig.savefig(f'plots\\proporcionalidade_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg')
+    fig.savefig(f'plots\\proporcionalidade_{eleicao}_cc_{lista_tamanhos_cc[0]}.jpg', bbox_inches = transforms.Bbox([[0.7, 2.5], [11.5, 6.2],]))
 
 
     # Votos que não serviram para eleger por partido
@@ -494,11 +529,21 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     df_reorganizacao_mandatos.to_csv(f'simulacoes\\reorganizacao_mandatos_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
     df_distritos.to_csv(f'simulacoes\\votos_perdidos_distrito_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
 
+
+    # análise ao concelho (votos perdidos)
+    df_perdidos_concelho['votos_perdidos_concelho'] = np.where(df_perdidos_concelho['votos_perdidos']>0, df_perdidos_concelho['votos_concelho'], 0)
+    df_perdidos_concelho['votos_perdidos_concelho_cc'] = np.where(df_perdidos_concelho['votos_perdidos_cc']>0, df_perdidos_concelho['votos_concelho'], 0)
+    df_perdidos_concelho = df_perdidos_concelho.groupby(['código','distrito','código_concelho','concelho'])[['votos_concelho','votos_perdidos_concelho','votos_perdidos_concelho_cc']].sum().reset_index()
+
+    df_perdidos_concelho['%_votos_perdidos_concelho'] = df_perdidos_concelho['votos_perdidos_concelho']/df_perdidos_concelho['votos_concelho']
+    df_perdidos_concelho['%_votos_perdidos_concelho_cc'] = df_perdidos_concelho['votos_perdidos_concelho_cc']/df_perdidos_concelho['votos_concelho']
+    df_perdidos_concelho.to_csv(f'simulacoes\\votos_perdidos_concelho_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
+
     return 0
 
 
 # Simular resultados de uma eleição dada uma lista de tamanhos de círculo de compensação
-def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros):
+def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros, df_votos_concelho):
 
     df_desvios = pd.DataFrame(columns = ['circulo_compensacao', 'desvio_proporcionalidade', 'votos_perdidos'])
 
@@ -512,7 +557,7 @@ def simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_mi
     # Guardar resultados
     if(len(lista_tamanhos_cc)==1):
         df_simulacao.to_csv(f'simulacoes\\simulacao_{eleicao}_cc_{lista_tamanhos_cc[0]}_mandatos.csv')
-        plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, lista_tamanhos_cc)
+        plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, lista_tamanhos_cc, df_votos_concelho)
     else:
         df_desvios.to_csv(f'simulacoes\\desvios_{eleicao}.csv')
         plot_desvios(df_desvios, eleicao)
@@ -537,7 +582,12 @@ def main(eleicoes, tamanho_circulo_minimo, lista_tamanhos_cc = range(0, 231), in
         df_total = obter_base(path, ano)
         df_mandatos = obter_mandatos(df_total)
         df_votos = obter_votos(df_total)
-        df_perdidos  = simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
+        df_concelho = obter_base_concelho(path, ano)
+        df_votos_concelho = obter_votos_concelho(df_concelho)
+
+        df_perdidos  = simular_eleicao(df_mandatos, df_votos, lista_tamanhos_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros, df_votos_concelho)
+
+
         sum(df_votos.loc[(df_votos['mandatos'] == 0)]['votos'])
         total_perdidos.loc[len(total_perdidos)] = [ano
                                                    , sum(df_votos.loc[(df_votos['mandatos'] == 0)&(~df_votos['partido'].isin(['brancos','nulos']))]['votos'])
