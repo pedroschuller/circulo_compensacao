@@ -480,15 +480,14 @@ def format_k(x):
 
 # Simular 
 def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_estrangeiros = True):
-    
-    eleicao = re.search('\d{4}', eleicao)[0]
+
     df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
     df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
 
     df_perdidos  = simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
 
     url = 'https://www.parlamento.pt/ActividadeParlamentar/Paginas/DetalheIniciativa.aspx?BID=243359'
-    st.write("É crucial agir agora para fortalecer a nossa democracia, garantindo que cada voto conta de maneira justa e equitativa. Convidamos todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar a nossa :red[proposta detalhada no site do Parlamento Português](%s)." % url)
+    st.write("É crucial agir agora para fortalecer a nossa democracia, garantindo que cada voto conta de maneira justa e equitativa. Convidamos todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar a nossa [proposta detalhada no site do Parlamento Português](%s)." % url)
     st.image('./votos_que_contam.png')
     st.divider()
     st.write('\u00a9 Iniciativa Liberal 2023')  
@@ -496,8 +495,8 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
 
 # Listar eleições a simular
 eleicao = st.selectbox(
-    'Que eleição simular?',
-    (':blue[2022]', ':blue[2019]', ':blue[2015]', ':blue[2011]', ':blue[2009]', ':blue[2005]'))
+    'Que eleição deseja simular?',
+    ('2022', '2019', '2015', '2011', '2009', '2005'))
 
 # Mínimo de mandatos por círculo distrital
 tamanho_circulo_minimo = 2
