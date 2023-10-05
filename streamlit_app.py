@@ -14,6 +14,12 @@ pd.set_option('mode.use_inf_as_na', False)
 st.set_page_config(page_title="Círculo de Compensação Nacional")
 st.title("Círculo de Compensação Nacional")
 st.header("Simulação da introdução de um mecanismo de compensação nas eleições legislativas")
+st.image('./votos_que_contam.png')
+st.write("O sistema eleitoral português enfrenta, há décadas, desafios críticos que necessitam de uma atenção urgente e ponderada. Um dos problemas mais prementes é o desperdício significativo de votos, uma realidade que não só desvirtua a verdadeira vontade expressa nas urnas pelos cidadãos, como também alimenta o fenómeno preocupante do voto útil ou táctico. Este cenário, onde centenas de milhares de votos não contribuem para a eleição de qualquer deputado, mina a confiança no sistema democrático, favorecendo desproporcionalmente os partidos maiores, em detrimento de uma representação parlamentar verdadeiramente plural e reflectiva da diversidade política do eleitorado.")
+
+st.write("A Iniciativa Liberal, consciente desta problemática, propõe uma solução inovadora e equitativa: a introdução de um círculo nacional de compensação. Esta proposta visa garantir que cada voto conta, independentemente do distrito, promovendo um sistema eleitoral mais justo, proporcional e alinhado com o espírito da Constituição Portuguesa. Este mecanismo permitiria uma distribuição de mandatos mais fiel às preferências dos eleitores, incentivando a participação cívica e fortalecendo a legitimidade dos representantes eleitos.")
+
+st.write("Para ilustrar de forma clara e transparente o impacto desta proposta, esta ferramenta permite visualizar, de maneira intuitiva e fundamentada, como a introdução de um círculo de compensação nacional poderia ter alterado os resultados das eleições legislativas desde 2005. Convidamos-te a compreender a profundidade da questão e a juntares-te a nós na defesa de um sistema eleitoral que verdadeiramente honre os princípios democráticos de representatividade e proporcionalidade.")
 
 #Substituir coligações, fusões ou rebrandings pelo maior partido (simplificação)
 mapping_partidos = {'E':'PNR',
@@ -251,6 +257,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
 
     # Hemiciclo
+    st.write("A proporcionalidade entre mandatos e votos é um pilar fundamental para a integridade e legitimidade de qualquer sistema democrático representativo. Este princípio assegura que a distribuição de assentos parlamentares reflete de maneira justa e precisa a vontade expressa pelos eleitores nas urnas, garantindo que cada voto contribua efetivamente para a configuração do órgão legislativo. Quando há uma desconexão entre a proporção de votos recebidos pelos partidos e o número de mandatos que lhes é atribuído, emerge um desequilíbrio que pode distorcer a representação política, marginalizar vozes minoritárias e, consequentemente, enfraquecer a confiança dos cidadãos no sistema eleitoral e nas instituições democráticas. Portanto, a busca pela proporcionalidade entre mandatos e votos é não apenas uma questão de justiça eleitoral, mas também um imperativo para a consolidação e fortalecimento da democracia.")
     cores_usar = df_cores[df_cores.index.isin(df_merge_votos.index)]['cor']
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
@@ -260,6 +267,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     st.pyplot(fig)
 
     # Votos para eleger um deputado por partido
+    st.write("A disparidade no número de votos necessários para eleger um deputado entre diferentes partidos é uma questão preocupante que evidencia falhas no sistema eleitoral, comprometendo a equidade e a justiça representativa. Esta incongruência resulta, muitas vezes, em uma representação parlamentar que não espelha fielmente a vontade do eleitorado. Partidos menores, apesar de receberem um apoio significativo nas urnas, podem encontrar-se sub-representados, necessitando de um número desproporcionalmente elevado de votos para garantir um assento. Por outro lado, partidos maiores podem beneficiar-se deste sistema, obtendo mais assentos do que a proporção de votos recebidos justificaria.")
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_merge_votos.sort_values(['votos_por_deputado', 'votos'], ascending = [False, True], inplace = True)
@@ -294,7 +302,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
 
     # Reorganização de mandatos por distrito
-
+    st.write("Com a introdução de um círculo nacional de compensação, a distribuição de mandatos entre os distritos eleitorais sofre algumas alterações para assegurar uma representação mais equitativa. Neste modelo, os mandatos destinados ao círculo de compensação são extraídos incrementalmente dos distritos eleitorais existentes. O processo inicia-se pela transferência de um mandato do distrito que apresenta o menor rácio de votos por deputado eleito, promovendo assim uma redistribuição ponderada. Este procedimento é repetido até que o número total de mandatos no círculo de compensação seja atingido. Importante salientar que, durante este processo de realocação, cada distrito eleitoral mantém, no mínimo, dois mandatos, garantindo que todas as regiões continuem a ter uma representação parlamentar básica. Esta abordagem visa não apenas preservar a representatividade de cada distrito, mas também criar um mecanismo de compensação que reflete de forma mais precisa e justa a vontade expressa pelos eleitores em todo o território nacional.")
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_reorganizacao_mandatos.sort_values(['mandatos', 'mandatos_cc'], inplace = True)
     df_reorganizacao_mandatos['distrito'].replace(mapping_distritos, inplace = True)
@@ -345,6 +353,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     
 
     # Votos perdidos (em percentagem) por distrito
+    st.write("Os distritos mais pequenos do interior, ilhas e estrangeiro enfrentam uma taxa de desperdício de votos alarmantemente alta, uma realidade que compromete gravemente a equidade e a integridade do processo democrático nestas regiões. Devido à sua menor densidade populacional e ao consequente número reduzido de mandatos atribuídos, muitos votos nestes distritos não resultam na eleição de representantes, sendo, na prática, votos inutilizados. Este cenário não só desfavorece os eleitores destas áreas, que veem sua voz diluída no conjunto nacional, como também alimenta um ciclo de desencanto e apatia política, dado que os cidadãos podem sentir que seu voto tem um impacto limitado.")
     df_distritos = df_distritos[~df_distritos.index.isin(['Compensação'])]
     df_distritos.rename(index = mapping_distritos, inplace = True)
     df_distritos['%votos_perdidos'] = 100.0*df_distritos['votos_perdidos']/df_distritos['votos']
@@ -406,7 +415,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
 
     # Votos que não serviram para eleger por partido
-
+    st.write("Os partidos maiores em Portugal beneficiam significativamente do atual sistema eleitoral, visto que uma maior percentagem de votos atribuídos a eles efetivamente contribui para eleger representantes. Este fenómeno contrasta acentuadamente com a realidade enfrentada pelos partidos menores, nos quais um número considerável de votos acaba por não se traduzir em mandatos, resultando em uma representação parlamentar que não espelha de forma justa o apoio popular que recebem. Esta discrepância amplifica o poder dos partidos dominantes, enquanto marginaliza e limita a influência de vozes políticas emergentes ou minoritárias, comprometendo a pluralidade e a diversidade essenciais para uma democracia robusta e vibrante.")
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_merge_votos.sort_values(['%votos_nao_convertidos', 'votos'], ascending=[False, True], inplace=True)
 
@@ -432,6 +441,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
 
      
     # Total de votos perdidos
+    st.write("A proposta de introdução de um círculo nacional de compensação visa, fundamentalmente, reduzir o número total de votos perdidos que o atual sistema eleitoral inevitavelmente produz. Enquanto no modelo vigente, centenas de milhares de votos não têm impacto na composição final da Assembleia da República, a implementação do círculo de compensação asseguraria que cada voto contaria de maneira mais equitativa e eficaz na atribuição de mandatos. Este ajuste não só valoriza o princípio democrático fundamental de que cada voto tem peso, mas também revitaliza a confiança dos eleitores no processo eleitoral, incentivando uma participação mais ativa e consciente nas urnas, e refletindo de forma mais fidedigna a diversidade e pluralidade da vontade popular no panorama político nacional.")
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     # Plot the bars and add data labels
     for i, label in enumerate(['votos_perdidos', 'votos_perdidos_cc']):
@@ -476,6 +486,13 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
 
     df_perdidos  = simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
 
+    url = 'https://www.parlamento.pt/ActividadeParlamentar/Paginas/DetalheIniciativa.aspx?BID=243359'
+    st.write("É crucial agir agora para fortalecer a nossa democracia, garantindo que cada voto conta de maneira justa e equitativa. Convidamos todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar a nossa [proposta detalhada no site do Parlamento Português](%s)." % url)
+    st.image('./votos_que_contam.png')
+    st.divider()
+
+
+
   
 
 
@@ -498,3 +515,5 @@ tamanho_cc = st.slider('Número de deputados no círculo de compensação nacion
 
 if __name__ == "__main__":
    main(eleicao, tamanho_circulo_minimo, tamanho_cc, incluir_estrangeiros)
+
+   
