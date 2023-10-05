@@ -40,7 +40,7 @@ mapping_partidos = {'E':'PNR',
 ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
                   'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
                   'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
-                  'PPD/PSD', 'IL', 'A', 'CDS-PP', 'PPM', #centro-direita
+                  'IL', 'PPD/PSD', 'A', 'CDS-PP', 'PPM', #centro-direita
                   'PND', 'CH', 'ADN', 'PNR'] #direita
 
 # Abreviar distritos para o plot
@@ -50,7 +50,11 @@ mapping_distritos = {'Castelo Branco':'C. Branco',
                      'Compensação':'Comp.'}
 
 # Cores aproximadas dos partidos em RGBA
-cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 'orange', 'cyan', 'cyan', 'blue', 'darkblue', 'red', 'darkblue', 'yellow', 'red']
+cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 
+         'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
+         'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
+         'cyan', 'orange', 'cyan', 'blue', 'darkblue', 
+         'red', 'darkblue', 'yellow', 'red']
 df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
 
