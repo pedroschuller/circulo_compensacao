@@ -16,12 +16,12 @@ pd.set_option('mode.use_inf_as_na', False)
 st.set_page_config(page_title="Círculo de Compensação Nacional")
 st.title("Círculo de Compensação Nacional")
 st.header("Simulação da introdução de um mecanismo de compensação nas eleições legislativas")
-st.image('./votos_que_contam.png')
+#st.image('./votos_que_contam.png')
 st.write("O sistema eleitoral português enfrenta, há décadas, desafios críticos que necessitam de uma atenção urgente e ponderada. Um dos problemas mais prementes é o desperdício significativo de votos, uma realidade que não só desvirtua a verdadeira vontade expressa nas urnas pelos cidadãos, como também alimenta o fenómeno preocupante do voto útil ou táctico. Este cenário, onde centenas de milhares de votos não contribuem para a eleição de qualquer deputado, mina a confiança no sistema democrático, favorecendo desproporcionalmente os partidos maiores, em detrimento de uma representação parlamentar verdadeiramente plural e reflectiva da diversidade política do eleitorado.")
 
-st.write("A Iniciativa Liberal, consciente desta problemática, propõe uma solução ambiciosa e equitativa: a introdução de um círculo nacional de compensação. Esta proposta visa garantir que cada voto conta, independentemente do distrito a que pertence, promovendo um sistema eleitoral mais justo, proporcional e alinhado com o espírito da Constituição da República Portuguesa. Este mecanismo permitiria uma distribuição de mandatos mais fiel às preferências dos eleitores, incentivando a participação cívica e fortalecendo a legitimidade dos representantes eleitos.")
+st.write("A Iniciativa Liberal, consciente desta problemática, propôs uma solução ambiciosa e equitativa: a introdução de um círculo nacional de compensação. Esta proposta visa garantir que cada voto conta, independentemente do distrito a que pertence, promovendo um sistema eleitoral mais justo, proporcional e alinhado com o espírito da Constituição da República Portuguesa. Este mecanismo permitiria uma distribuição de mandatos mais fiel às preferências dos eleitores, incentivando a participação cívica e fortalecendo a legitimidade dos representantes eleitos.")
 
-st.write("Para ilustrar de forma clara e transparente o impacto desta proposta, esta ferramenta permite visualizar, de maneira intuitiva e fundamentada, como a introdução de um círculo de compensação nacional poderia ter alterado os resultados das eleições legislativas desde 2005. Convidamos-te a compreender a profundidade da questão e a juntares-te a nós na defesa de um sistema eleitoral que verdadeiramente honre os princípios democráticos de representatividade e proporcionalidade.")
+st.write("Para ilustrar de forma clara e transparente o impacto desta proposta, esta ferramenta permite visualizar, de maneira intuitiva e fundamentada, como a introdução de um círculo de compensação nacional poderia ter alterado os resultados das eleições legislativas desde 2005. Convido-te a compreender a profundidade da questão e a juntares-te na defesa de um sistema eleitoral que verdadeiramente honre os princípios democráticos de representatividade e proporcionalidade.")
 
 #Substituir coligações, fusões ou rebrandings pelo maior partido (simplificação)
 mapping_partidos = {'E':'PNR',
@@ -501,10 +501,10 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
     df_perdidos  = simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
 
     url = 'https://www.parlamento.pt/ActividadeParlamentar/Paginas/DetalheIniciativa.aspx?BID=243359'
-    st.write("Não se pode continuar a ignorar o elefante na sala do nosso sistema eleitoral. É crucial agir para fortalecer a nossa democracia, garantindo que cada voto conta. Convidamos todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar a nossa [proposta](%s) detalhada no site do Parlamento Português. Não há portugueses de segunda, não pode haver votos de segunda." % url)
-    st.image('./votos_que_contam.png')
+    st.write("Não se pode continuar a ignorar o elefante na sala do nosso sistema eleitoral. É crucial agir para fortalecer a nossa democracia, garantindo que cada voto conta. Convido todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar esta [proposta](%s) detalhada no site do Parlamento Português. Não há portugueses de segunda, não pode haver votos de segunda." % url)
+    #st.image('./votos_que_contam.png')
     st.divider()
-    st.write('\u00a9 Iniciativa Liberal 2023')  
+    st.write('\u00a9 Pedro Schuller 2023')  
 
 
 # Listar eleições a simular
