@@ -14,6 +14,16 @@ pd.set_option('mode.use_inf_as_na', False)
 
 # Configs streamlit
 st.set_page_config(page_title="Círculo de Compensação Nacional")
+st.markdown(""" # Custom CSS rules for better year select display and text links
+    <style>
+        .stSelectbox * { cursor: pointer !important; }
+        .stSelectbox div[value] { color: black; }
+        div[aria-selected=true] { color: red; }
+        div[data-baseweb=popover] * {color: black !important }
+        .stMarkdown a { color: #FFF !important;}
+        .stMarkdown a:hover { text-decoration: none !important;}
+    </style>
+""", unsafe_allow_html=True)
 st.title("Círculo de Compensação Nacional")
 st.header("Simulação da introdução de um mecanismo de compensação nas eleições legislativas")
 #st.image('./votos_que_contam.png')
