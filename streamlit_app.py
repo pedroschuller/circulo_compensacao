@@ -18,7 +18,6 @@ st.markdown(""" # Custom CSS rules for better year select display and text links
     <style>
         .stSelectbox * { cursor: pointer !important; }
         .stSelectbox div[value] { color: black; }
-        div[aria-selected=true] { color: red; }
         div[data-baseweb=popover] * {color: black !important }
         .stMarkdown a { color: #FFF !important;}
         .stMarkdown a:hover { text-decoration: none !important;}
