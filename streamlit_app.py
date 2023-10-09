@@ -14,7 +14,8 @@ pd.set_option('mode.use_inf_as_na', False)
 
 # Configs streamlit
 st.set_page_config(page_title="Círculo de Compensação Nacional")
-st.markdown(""" # Custom CSS rules for better year select display and text links
+# Custom CSS rules for better year select display and text links
+st.markdown("""
     <style>
         .stSelectbox * { cursor: pointer !important; }
         .stSelectbox div[value] { color: black; }
