@@ -60,6 +60,29 @@ def obter_base(path, ano):
 
     return df_total
 
+# Limpar dados base
+def obter_base_1975_2002(path, ano):
+    sheet_nacional = f'AR_{ano}_Distrito_Reg.Autónoma' 
+    sheet_int = f'AR_{ano}_Global' 
+    # Território nacional
+    df_nac = pd.read_excel(path, sheet_name=sheet_nacional, skiprows = 3, nrows = 21) 
+    # Europa e fora da europa
+    df_int = pd.read_excel(path, sheet_name=sheet_int, skiprows = 3, nrows = 5) 
+
+    # Corrigir nomes
+    mapping={"nome do território": "distrito", "distrito/região autónoma": "distrito", 'círculo':'distrito', 'nome do distrito/região autónoma':'distrito'}
+    df_nac.rename(columns=mapping, inplace = True)
+    df_int.rename(columns=mapping, inplace = True)
+
+    # Filtrar linhas #PROBLEM
+    df_total = pd.concat([df_nac.loc[(df_nac["código"]!=500000) & (df_nac["código"]!=990000)], 
+                        df_int.loc[df_int["código"]==800000],
+                        df_int.loc[df_int["código"]==810000], 
+                        df_int.loc[df_int["código"]==820000], 
+                        df_int.loc[df_int["código"]==900000]])   
+
+    return df_total
+
 
 # Limpar dados base
 def obter_base_concelho(path, ano):
