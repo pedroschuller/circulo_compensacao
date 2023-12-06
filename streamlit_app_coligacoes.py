@@ -413,11 +413,10 @@ coligacoes = [list(comb) for comb in coligacoes]
 print(coligacoes)
 
 # Simular um tamanho
-coligacao = st.selectbox(
+coligacao = st.multiselect(
     'Que coligação deseja simular?',
-    (coligacoes))
+    (coligaveis))
 
-coligacao = coligacoes[3]
 
 distritos_coligacao = st.multiselect(
     'Em que distritos há coligação',
@@ -430,10 +429,6 @@ distritos_coligacao = st.multiselect(
        'Santarém', 'Viana do Castelo', 'Vila Real',
        'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'])
 
-distritos_coligacao = ['Beja', 'Bragança', 'Castelo Branco', 'Coimbra',
-       'Évora', 'Guarda', 'Portalegre',
-       'Santarém', 'Viana do Castelo', 'Vila Real',
-       'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa']
 
 if __name__ == "__main__":
    main(eleicao, coligacao, distritos_coligacao)
