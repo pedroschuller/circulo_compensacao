@@ -381,7 +381,7 @@ def coligar(df_votos, coligacao, distritos_coligacao):
     return df_coligacao
 
 # Simular 
-def main(eleicao, coligacao):
+def main(eleicao, coligacao, distritos_coligacao):
 
     df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
     df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
