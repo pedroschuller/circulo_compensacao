@@ -12,12 +12,23 @@ import streamlit as st
 
 pd.set_option('mode.use_inf_as_na', False)
 
+
+
 # Configs streamlit
 st.set_page_config(page_title="Coligação Legislativas")
 st.title("Coligação")
 st.header("Simulação de coligações eleitorais")
-#st.image('./votos_que_contam.png')
-
+st.markdown("""
+    <style>
+        .stSelectbox * { cursor: pointer !important; }
+        .stSelectbox div[value] { color: black; }
+        div[data-baseweb=popover] * {color: black !important }
+        .stMarkdown a { color: #FFF !important;}
+        .stMarkdown a:hover { text-decoration: none !important;}
+        .stMultiselect * { cursor: pointer !important; }
+        .stMultiselect div[value] { color: black; }
+    </style>
+""", unsafe_allow_html=True)
 #Substituir coligações, fusões ou rebrandings pelo maior partido (simplificação)
 mapping_partidos = {'E':'PNR',
                     'P.N.R.':'PNR',
