@@ -31,26 +31,11 @@ mapping_partidos = {'E':'PNR',
                     'PPD/PSD.CDS-PP.PPM':'PPD/PSD',
                     'PCTP/MRPP':'MRPP'}
 
-# Partidos da esquerda para a direita (discutível mas suficiente)
-ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
-                  'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
-                  'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
-                  'IL', 'PPD/PSD', 'A', 'CDS-PP', 'PPM', #centro-direita
-                  'PND', 'CH', 'ADN', 'PNR'] #direita
-
 # Abreviar distritos para o plot
 mapping_distritos = {'Castelo Branco':'C. Branco',
                      'Viana do Castelo': 'V. Castelo',
                      'Fora da Europa':'F. Europa',
                      'Compensação':'Comp.'}
-
-# Cores aproximadas dos partidos em RGBA
-cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 
-         'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
-         'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
-         'cyan', 'orange', 'cyan', 'blue', 'darkblue', 
-         'red', 'darkblue', 'yellow', 'red']
-df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
 
 # Limpar dados base
@@ -180,6 +165,25 @@ def plot_hemiciclo(ax, mandatos, votos, cores, title, ordem_partidos):
 
 # Desenhar gráficos de comparação entre a situação atual e a introdução de um Coligação
 def plot_comparacao(df_votos, df_simulacao, df_perdidos, eleicao, coligacao):
+
+
+    # Partidos da esquerda para a direita (discutível mas suficiente)
+    ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
+                    'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
+                    'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
+                    'IL', 'PPD/PSD', 'A', 'CDS-PP', 'PPM', #centro-direita
+                    'PND', 'CH', 'ADN', 'PNR'] #direita
+
+
+    # Cores aproximadas dos partidos em RGBA
+    cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 
+            'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
+            'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
+            'cyan', 'orange', 'cyan', 'blue', 'darkblue', 
+            'red', 'darkblue', 'yellow', 'red']
+
+    df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
+
 
     # Preparar dados
     df_merge_votos = pd.merge(df_votos.dropna(), right = df_simulacao, on = ['código', 'distrito', 'partido'], how = 'outer', suffixes = ('', '_col'))
