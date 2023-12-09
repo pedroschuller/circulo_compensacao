@@ -407,7 +407,7 @@ def main():
     df_a_editar.columns = ['partido', 'votação']
 
     st.write("Inserir sondagem:")
-    df_sondagem = st.data_editor(df_a_editar, disabled = 'partido', hide_index = True)
+    df_sondagem = st.data_editor(df_a_editar, disabled = ['partido'], hide_index = True)
 
     checksum = sum(df_sondagem['votação'])
 
