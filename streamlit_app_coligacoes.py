@@ -1,3 +1,4 @@
+# Imports
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import ConnectionPatch
@@ -10,14 +11,13 @@ import re
 import numpy as np
 import streamlit as st
 
-pd.set_option('mode.use_inf_as_na', False)
 
+# Configs
+pd.set_option('mode.use_inf_as_na', False)
 
 
 # Configs streamlit
 st.set_page_config(page_title="Coligação Legislativas")
-st.title("Coligação")
-st.header("Simulação de coligações eleitorais")
 st.markdown("""
     <style>
         .stSelectbox * { cursor: pointer !important; }
@@ -29,24 +29,6 @@ st.markdown("""
         .stMultiselect div[value] { color: black; }
     </style>
 """, unsafe_allow_html=True)
-#Substituir coligações, fusões ou rebrandings pelo maior partido (simplificação)
-mapping_partidos = {'E':'PNR',
-                    'P.N.R.':'PNR',
-                    'MPT-P.H.':'MPT',
-                    'PPV':'CH',
-                    'PPV/CDC':'CH',
-                    'CDS-PP.PPM':'CDS-PP',
-                    'L/TDA':'L',
-                    'PPD/PSD.CDS-PP':'PPD/PSD',
-                    'PTP-MAS':'PTP',
-                    'PPD/PSD.CDS-PP.PPM':'PPD/PSD',
-                    'PCTP/MRPP':'MRPP'}
-
-# Abreviar distritos para o plot
-mapping_distritos = {'Castelo Branco':'C. Branco',
-                     'Viana do Castelo': 'V. Castelo',
-                     'Fora da Europa':'F. Europa',
-                     'Compensação':'Comp.'}
 
 
 # Limpar dados base
@@ -97,12 +79,36 @@ def obter_votos(df_total):
     return df_votos
 
 
+# Resultados a nível nacional
+def obter_nacional(df_votos):
+    df_nacional = df_votos[['partido', 'votos', 'mandatos']].copy(deep = True)
+    df_nacional.partido = np.where(df_nacional.partido.isin(grandes_partidos), df_nacional.partido ,'O/B/N')
+    df_nacional = df_nacional.groupby('partido').sum()
+    df_nacional['flag_obn'] = (df_nacional.index == 'O/B/N')
+    df_nacional.sort_values(['flag_obn', 'votos'], ascending = [True, False], inplace = True)
+    df_nacional.reset_index(inplace = True)
+    df_nacional['% votos'] = 100.0 * df_nacional.votos / np.sum(df_nacional.votos)
+    df_nacional['% votos arred.'] = np.round(df_nacional['% votos'], 1)
+    return df_nacional
+
+
+# Ajustar votos com base na sondagem
+def ajustar_votacao(df_votos, df_sondagem, df_nacional):
+    df_nacional = pd.merge(df_nacional, right = df_sondagem, how = 'left', on = 'partido')
+    df_nacional['multiplicador'] = df_nacional['votação'] / df_nacional['% votos arred.']
+
+    df_votos_ajust = pd.merge(df_votos, right = df_nacional[['partido', 'multiplicador']], on = 'partido')
+    df_votos_ajust['votos_old'] = df_votos_ajust['votos']
+    df_votos_ajust['votos'] = df_votos_ajust['votos'] * df_votos_ajust['multiplicador']
+    return df_votos_ajust
+
+
 # Algoritmo Método d'Hondt
 def metodo_hondt(df_mandatos, df_votos, df_coligacao):
     df_hondt = df_votos.iloc[:0,:].copy()
 
     # Retirar nulos e brancos
-    df_coligacao  = df_coligacao[df_coligacao['partido'].isin(['nulos', 'brancos']) == False].copy(deep = True) 
+    df_coligacao = df_coligacao[df_coligacao['partido'].isin(['nulos', 'brancos']) == False].copy(deep = True) 
 
     # Inicializar mandatos atribuidos e algoritmo 
     df_coligacao['mandatos'] = 0 
@@ -130,11 +136,8 @@ def metodo_hondt(df_mandatos, df_votos, df_coligacao):
         
         # Acrescentar resultados do distrito
         df_hondt = pd.concat([df_hondt, votos_d[df_hondt.columns]], ignore_index = True)
-
-    # São dados como perdidos os votos que não elegeram ninguém
-    df_perdidos = df_hondt.loc[df_hondt['mandatos'] == 0].copy(deep = True)
     
-    return df_hondt, df_perdidos
+    return df_hondt
 
 
 # Função gráfico hemiciclo 
@@ -174,24 +177,8 @@ def plot_hemiciclo(ax, mandatos, votos, cores, title, ordem_partidos):
             last_y = y  # Store the last y position
 
 
-# Desenhar gráficos de comparação entre a situação atual e a introdução de um Coligação
-def plot_comparacao(df_votos, df_simulacao, df_perdidos, eleicao, coligacao):
-
-
-    # Partidos da esquerda para a direita (discutível mas suficiente)
-    ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
-                    'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
-                    'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
-                    'IL', 'PPD/PSD', 'A', 'CDS-PP', 'PPM', #centro-direita
-                    'PND', 'CH', 'ADN', 'PNR'] #direita
-
-
-    # Cores aproximadas dos partidos em RGBA
-    cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 
-            'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
-            'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
-            'cyan', 'orange', 'cyan', 'blue', 'darkblue', 
-            'red', 'darkblue', 'yellow', 'red']
+# Desenhar gráficos de comparação entre a situação atual e uma coligação
+def plot_comparacao(df_votos, df_simulacao, eleicao, coligacao):
 
     df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
@@ -373,78 +360,129 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, eleicao, coligacao):
     st.pyplot(fig)
 
 
-# Simular resultados de uma eleição dada uma lista de tamanhos de Coligação
-def simular_eleicao(df_mandatos, df_votos, df_coligacao, eleicao, coligacao):
+# Simular resultados de uma eleição dadas as sondagens e uma coligação
+def simular_eleicao(df_mandatos, df_votos, df_votos_ajust, df_coligacao, eleicao, coligacao):
 
-    df_simulacao, df_perdidos = metodo_hondt(df_mandatos, df_votos, df_coligacao)    
+    df_votos_ajust = metodo_hondt(df_mandatos, df_votos, df_votos_ajust)    
+
+    df_coligacao = metodo_hondt(df_mandatos, df_votos, df_coligacao)    
     
-    plot_comparacao(df_votos, df_simulacao, df_perdidos, eleicao, coligacao)
+    plot_comparacao(df_votos_ajust, df_coligacao, eleicao, coligacao)
 
-    return df_perdidos
+    pass
 
 
 # Convert numbers to 'k' format
 def format_k(x):
     return f"{x/1000:.0f}k" if x >= 1000 else str(x)
 
+
 # Coligar partidos
 def coligar(df_votos, coligacao, distritos_coligacao):
     df_coligacao = df_votos.copy()
     df_coligacao['coligados'] = df_coligacao['partido'].isin(coligacao) & df_coligacao['distrito'].isin(distritos_coligacao)
     df_coligacao.loc[df_coligacao['coligados'],'partido'] = '/'.join(coligacao)
-    df_coligacao = df_coligacao.groupby(['código', 'distrito', 'partido']).sum()[['votos', '% votos']].reset_index()
+    df_coligacao = df_coligacao.groupby(['código', 'distrito', 'partido']).sum()[['votos']].reset_index()
     return df_coligacao
 
-# Simular 
-def main(eleicao, coligacao, distritos_coligacao):
 
+# Simular 
+def main():
+    st.title("Simulador de coligações eleitorais")
+
+    # Listar eleições a simular
+    eleicao = st.selectbox(
+        'Que eleição deseja simular?',
+        ('2022', '2019', '2015', '2011', '2009', '2005'))
+    
+    eleicao = '2022' 
+    
     df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
     df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
-    df_coligacao = coligar(df_votos, coligacao, distritos_coligacao)
-    df_perdidos  = simular_eleicao(df_mandatos, df_votos, df_coligacao, eleicao, coligacao)
 
-    #st.image('./votos_que_contam.png')
+    partidos = df_votos.partido.unique()
+    partidos = partidos[(partidos != 'brancos') & (partidos != 'nulos')]
+    
+    df_nacional = obter_nacional(df_votos)
+
+    df_a_editar = df_nacional[['partido', '% votos arred.']]
+    df_a_editar.columns = ['partido', 'votação']
+
+    df_sondagem = st.data_editor(df_a_editar, disabled = 'partido', hide_index = True)
+
+    if((sum(df_sondagem['votação']) > 101.0) | (sum(df_sondagem['votação']) < 99.0)):
+        st.write('Os votos devem totalizar 100%!')
+    else:
+
+        df_votos_ajust = ajustar_votacao(df_votos, df_sondagem, df_nacional)
+
+        # Simular uma coligação
+        coligacao = st.multiselect(
+            'Que coligação deseja simular?',
+            (partidos))
+
+        distritos_coligacao = st.multiselect(
+            'Em que distritos há coligação',
+            ['Aveiro', 'Beja', 'Braga', 'Bragança', 'Castelo Branco', 'Coimbra',
+            'Évora', 'Faro', 'Guarda', 'Leiria', 'Lisboa', 'Portalegre',
+            'Porto', 'Santarém', 'Setúbal', 'Viana do Castelo', 'Vila Real',
+            'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'],
+            ['Beja', 'Bragança', 'Castelo Branco', 'Coimbra',
+            'Évora', 'Guarda', 'Portalegre',
+            'Santarém', 'Viana do Castelo', 'Vila Real',
+            'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'])
+
+        df_coligacao = coligar(df_votos_ajust, coligacao, distritos_coligacao)
+        _ = simular_eleicao(df_mandatos, df_votos, df_coligacao, eleicao, coligacao)
+
     st.divider()
     st.write('\u00a9 Pedro Schuller 2023')  
 
 
-# Listar eleições a simular
-eleicao = st.selectbox(
-    'Que eleição deseja simular?',
-    ('2022', '2019', '2015', '2011', '2009', '2005'))
-
-coligaveis = ['PPD/PSD', 'IL', 'CDS-PP']
-
-import itertools
-# Generate combinations
-coligacoes = []
-for r in range(2, len(coligaveis) + 1):
-    combinations = itertools.combinations(coligaveis, r)
-    coligacoes.extend(combinations)
-
-# Convert each combination to a list (optional, for better readability)
-coligacoes = [list(comb) for comb in coligacoes]
-
-print(coligacoes)
-
-# Simular um tamanho
-coligacao = st.multiselect(
-    'Que coligação deseja simular?',
-    (coligaveis))
+# Substituir coligações, fusões ou rebrandings pelo maior partido (simplificação)
+mapping_partidos = {'E':'PNR',
+                    'P.N.R.':'PNR',
+                    'MPT-P.H.':'MPT',
+                    'PPV':'CH',
+                    'PPV/CDC':'CH',
+                    'CDS-PP.PPM':'CDS-PP',
+                    'L/TDA':'L',
+                    'PPD/PSD.CDS-PP':'PPD/PSD',
+                    'PTP-MAS':'PTP',
+                    'PPD/PSD.CDS-PP.PPM':'PPD/PSD',
+                    'PCTP/MRPP':'MRPP'}
 
 
-distritos_coligacao = st.multiselect(
-    'Em que distritos há coligação',
-    ['Aveiro', 'Beja', 'Braga', 'Bragança', 'Castelo Branco', 'Coimbra',
-       'Évora', 'Faro', 'Guarda', 'Leiria', 'Lisboa', 'Portalegre',
-       'Porto', 'Santarém', 'Setúbal', 'Viana do Castelo', 'Vila Real',
-       'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'],
-    ['Beja', 'Bragança', 'Castelo Branco', 'Coimbra',
-       'Évora', 'Guarda', 'Portalegre',
-       'Santarém', 'Viana do Castelo', 'Vila Real',
-       'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'])
+# Abreviar distritos para o plot
+mapping_distritos = {'Castelo Branco':'C. Branco',
+                     'Viana do Castelo': 'V. Castelo',
+                     'Fora da Europa':'F. Europa',
+                     'Compensação':'Comp.'}
+
+
+# Partidos da esquerda para a direita (discutível mas suficiente)
+ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
+                'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
+                'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
+                'IL', 'PPD/PSD', 'A', 'CDS-PP', 'PPM', #centro-direita
+                'PND', 'CH', 'ADN', 'PNR'] #direita
+
+
+# Cores aproximadas dos partidos em RGBA
+cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 
+        'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
+        'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
+        'cyan', 'orange', 'cyan', 'blue', 'darkblue', 
+        'red', 'darkblue', 'yellow', 'red']
+
+
+# Partidos a excluir de "outros"
+grandes_partidos = ['B.E.', 'PCP-PEV', 
+                    'L', 'PS', 'PAN',  
+                    'IL', 'PPD/PSD', 'CDS-PP',
+                    'CH'] 
 
 
 if __name__ == "__main__":
-   main(eleicao, coligacao, distritos_coligacao)
+   main()
 
