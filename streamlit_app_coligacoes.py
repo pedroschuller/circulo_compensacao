@@ -417,10 +417,12 @@ def main():
 
         df_votos_ajust = ajustar_votacao(df_votos, df_sondagem, df_nacional)
 
+        default_coligacoes = [value for value in ['PPD/PSD', 'IL', 'CDS-PP'] if value in partidos]
+
         # Simular uma coligação
         coligacao = st.multiselect(
             'Que coligação deseja simular?',
-            (partidos), ['PPD/PSD', 'IL', 'CDS-PP'])
+            (partidos), (default_coligacoes))
 
         distritos_coligacao = st.multiselect(
             'Em que distritos há coligação',
