@@ -408,6 +408,7 @@ def main():
     df_a_editar = df_nacional[['partido', '% votos arred.']]
     df_a_editar.columns = ['partido', 'votação']
 
+    st.write("Inserir sondagem:")
     df_sondagem = st.data_editor(df_a_editar, disabled = 'partido', hide_index = True)
 
     if((sum(df_sondagem['votação']) > 101.0) | (sum(df_sondagem['votação']) < 99.0)):
@@ -419,7 +420,7 @@ def main():
         # Simular uma coligação
         coligacao = st.multiselect(
             'Que coligação deseja simular?',
-            (partidos))
+            (partidos), ['PPD/PSD', 'IL', 'CDS-PP'])
 
         distritos_coligacao = st.multiselect(
             'Em que distritos há coligação',
@@ -433,7 +434,7 @@ def main():
             'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'])
 
         df_coligacao = coligar(df_votos_ajust, coligacao, distritos_coligacao)
-        _ = simular_eleicao(df_mandatos, df_votos, df_votos_ajust, df_coligacao, eleicao, coligacao)
+        simular_eleicao(df_mandatos, df_votos, df_votos_ajust, df_coligacao, eleicao, coligacao)
 
     st.divider()
     st.write('\u00a9 Pedro Schuller 2023')  
