@@ -382,7 +382,7 @@ def coligar(df_votos, coligacao, distritos_coligacao):
     df_coligacao = df_votos.copy()
     df_coligacao['coligados'] = df_coligacao['partido'].isin(coligacao) & df_coligacao['distrito'].isin(distritos_coligacao)
     df_coligacao.loc[df_coligacao['coligados'],'partido'] = '/'.join(coligacao)
-    df_coligacao = df_coligacao.groupby(['código', 'distrito', 'partido']).sum()[['votos']].reset_index()
+    df_coligacao = df_coligacao.groupby(['código', 'distrito', 'partido']).sum()[['votos', '% votos']].reset_index()
     return df_coligacao
 
 
