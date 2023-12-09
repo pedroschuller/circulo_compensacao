@@ -392,7 +392,7 @@ def main():
 
     # Listar eleições a simular
     eleicao = st.selectbox(
-        'Que eleição deseja simular?',
+        'Eleição a simular:',
         ('2022', '2019', '2015', '2011', '2009', '2005'))
     
     eleicao = '2022' 
@@ -433,7 +433,7 @@ def main():
             'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'])
 
         df_coligacao = coligar(df_votos_ajust, coligacao, distritos_coligacao)
-        _ = simular_eleicao(df_mandatos, df_votos, df_coligacao, eleicao, coligacao)
+        _ = simular_eleicao(df_mandatos, df_votos, df_votos_ajust, df_coligacao, eleicao, coligacao)
 
     st.divider()
     st.write('\u00a9 Pedro Schuller 2023')  
