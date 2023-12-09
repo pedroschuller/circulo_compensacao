@@ -394,9 +394,7 @@ def main():
     eleicao = st.selectbox(
         'Eleição a simular:',
         ('2022', '2019', '2015', '2011', '2009', '2005'))
-    
-    eleicao = '2022' 
-    
+        
     df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
     df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
 
@@ -411,8 +409,10 @@ def main():
     st.write("Inserir sondagem:")
     df_sondagem = st.data_editor(df_a_editar, disabled = 'partido', hide_index = True)
 
-    if((sum(df_sondagem['votação']) > 101.0) | (sum(df_sondagem['votação']) < 99.0)):
-        st.write('Os votos devem totalizar 100%!')
+    checksum = sum(df_sondagem['votação'])
+
+    if((checksum > 101.0) | (checksum < 99.0)):
+        st.write(f'Os votos devem totalizar 100%! De momento somam {checksum}')
     else:
 
         df_votos_ajust = ajustar_votacao(df_votos, df_sondagem, df_nacional)
