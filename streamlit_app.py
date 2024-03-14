@@ -51,8 +51,8 @@ ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
                   'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
                   'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
                   'IL', 'PPD/PSD', 'AD', 'A', 'CDS-PP', 'PPM', #centro-direita
-                  'PND', 'CH', 'ADN', 'PNR', #direita
-                  'Outros'] 
+                  'PND', 'CH', 'ADN', 'PNR'] #direita
+                   
 
 # Abreviar distritos para o plot
 mapping_distritos = {'Castelo Branco':'C. Branco',
@@ -65,8 +65,8 @@ cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred',
          'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
          'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
          'cyan', 'orange', 'orange', 'cyan', 'blue', 'darkblue', 
-         'red', 'darkblue', 'yellow', 'red',
-         'grey']
+         'red', 'darkblue', 'yellow', 'red']
+
 df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
 
