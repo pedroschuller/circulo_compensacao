@@ -41,16 +41,16 @@ mapping_partidos = {'E':'PNR',
                     'PPV/CDC':'CH',
                     'CDS-PP.PPM':'CDS-PP',
                     'L/TDA':'L',
-                    'PPD/PSD.CDS-PP':'PPD/PSD',
+                    'PPD/PSD.CDS-PP':'AD',
                     'PTP-MAS':'PTP',
-                    'PPD/PSD.CDS-PP.PPM':'PPD/PSD',
+                    'PPD/PSD.CDS-PP.PPM':'AD',
                     'PCTP/MRPP':'MRPP'}
 
 # Partidos da esquerda para a direita (discutível mas suficiente)
 ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
                   'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
                   'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
-                  'IL', 'PPD/PSD', 'A', 'CDS-PP', 'PPM', #centro-direita
+                  'IL', 'PPD/PSD', 'AD', 'A', 'CDS-PP', 'PPM', #centro-direita
                   'PND', 'CH', 'ADN', 'PNR'] #direita
 
 # Abreviar distritos para o plot
@@ -63,7 +63,7 @@ mapping_distritos = {'Castelo Branco':'C. Branco',
 cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 
          'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
          'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
-         'cyan', 'orange', 'cyan', 'blue', 'darkblue', 
+         'cyan', 'orange', 'cyan', 'orange', 'blue', 'darkblue', 
          'red', 'darkblue', 'yellow', 'red']
 df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
@@ -520,7 +520,7 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
 # Listar eleições a simular
 eleicao = st.selectbox(
     'Que eleição deseja simular?',
-    ('2022', '2019', '2015', '2011', '2009', '2005'))
+    ('2024', '2022', '2019', '2015', '2011', '2009', '2005'))
 
 # Mínimo de mandatos por círculo distrital
 tamanho_circulo_minimo = 2
