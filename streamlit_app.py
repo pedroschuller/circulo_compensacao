@@ -51,7 +51,8 @@ ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
                   'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
                   'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
                   'IL', 'PPD/PSD', 'AD', 'A', 'CDS-PP', 'PPM', #centro-direita
-                  'PND', 'CH', 'ADN', 'PNR'] #direita
+                  'PND', 'CH', 'ADN', 'PNR', #direita
+                  'Outros'] 
                    
 
 # Abreviar distritos para o plot
@@ -65,7 +66,8 @@ cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred',
          'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
          'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
          'cyan', 'orange', 'orange', 'cyan', 'blue', 'darkblue', 
-         'red', 'darkblue', 'yellow', 'red']
+         'red', 'darkblue', 'yellow', 'red',
+         'grey']
 
 df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
@@ -163,7 +165,7 @@ def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
         # Atribuir mandatos dos círculos distritais
         while mandatos_atribuidos < mandatos_d:
             # Partido a Eleger
-            max_v = votos_d['votos_dhondt'].max()
+            max_v = votos_d[votos_d['partido']!='Outros']['votos_dhondt'].max()
             max_v_index = votos_d[votos_d['votos_dhondt'] == max_v].index[0]
 
             # Atribuir mandato
@@ -190,7 +192,7 @@ def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
     # Atribuir mandatos círculo compensação
     for _ in range(circ_comp):
         # É atribuido o novo mandato ao partido com mais votos a dividir por todos os mandatos já atribuídos
-        max_v = df_compensacao['votos_dhondt'].max()
+        max_v = df_compensacao[df_compensacao['partido']!='Outros']['votos_dhondt'].max()
         max_v_index = df_compensacao[df_compensacao['votos_dhondt'] == max_v].index[0]
 
         # Atribuir mandato
@@ -292,6 +294,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     plt.show()
     st.pyplot(fig, bbox_inches = transforms.Bbox([[0.7, 2.5], [11.5, 6.2],]))
 
+
     # Votos para eleger um deputado por partido
     st.write("A disparidade no número de votos necessários para eleger um deputado entre diferentes partidos é uma questão preocupante que evidencia distorções no sistema eleitoral, comprometendo a equidade e a justiça representativa. Esta incongruência resulta, muitas vezes, numa representação parlamentar que não espelha fielmente a vontade do eleitorado. Partidos com menos expressão, apesar de receberem um apoio significativo nas urnas, encontram-se sub-representados, necessitando de um número desproporcionalmente elevado de votos para garantir um mandato. Por outro lado, partidos maiores beneficiam deste sistema, obtendo mais mandatos do que a proporção de votos recebidos justificaria.")
 
@@ -377,7 +380,6 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     st.pyplot(fig)
 
     
-
     # Votos perdidos (em percentagem) por distrito
     st.write("Os distritos mais pequenos do interior, ilhas e estrangeiro enfrentam uma taxa de desperdício de votos inaceitável, uma realidade que compromete gravemente a equidade e a integridade do processo democrático nestas regiões. Devido à sua menor densidade populacional e ao consequente número reduzido de mandatos atribuídos, muitos votos nestes distritos não resultam na eleição de representantes, sendo, na prática, votos inutilizados. Este cenário não só desfavorece os eleitores destas áreas, que veem a sua voz diluída no conjunto nacional, como também alimenta um ciclo de desencanto e apatia política, dado que os cidadãos podem sentir que seu voto tem um impacto limitado ou nulo.")
     df_distritos = df_distritos[~df_distritos.index.isin(['Compensação'])]
@@ -516,7 +518,8 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
     st.write("Não se pode continuar a ignorar o elefante na sala do nosso sistema eleitoral. É crucial agir para fortalecer a nossa democracia, garantindo que cada voto conta. Convido todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar esta [proposta](%s) detalhada no site do Parlamento Português. Não há portugueses de segunda, não pode haver votos de segunda." % url)
     #st.image('./votos_que_contam.png')
     st.divider()
-    st.write('\u00a9 Pedro Schuller 2023')  
+    st.write('\u00a9 Pedro Schuller 2024')  
+
 
 
 # Listar eleições a simular
@@ -527,13 +530,13 @@ eleicao = st.selectbox(
 # Mínimo de mandatos por círculo distrital
 tamanho_circulo_minimo = 2
 
-# Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação?
+# Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação? 
 incluir_estrangeiros = st.toggle('Votos nos círculos eleitorais internacionais contam para o círculo nacional de compensação?', value = True)
 
 # simulação não pode retirar mais deputados do que o mínimo 
 tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
 
-# Simular um tamanho
+# Simular um tamanho 
 tamanho_cc = st.slider('Número de deputados no círculo de compensação nacional', 0, tamanho_maximo_circulo_compensacao, 40)
 
 if __name__ == "__main__":
