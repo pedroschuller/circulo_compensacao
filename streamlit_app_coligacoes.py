@@ -393,7 +393,7 @@ def main():
     # Listar eleições a simular
     eleicao = st.selectbox(
         'Eleição a simular:',
-        ('2022', '2019', '2015', '2011', '2009', '2005'))
+        ('2024', '2022', '2019', '2015', '2011', '2009', '2005'))
         
     df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
     df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
