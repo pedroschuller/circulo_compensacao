@@ -521,7 +521,7 @@ cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred',
 
 
 # Partidos a excluir de "outros"
-grandes_partidos = ['B.E.', 'PCP-PEV', 
+grandes_partidos = ['B.E.', 'PCP-PEV', 'AD',
                     'L', 'PS', 'PAN',  
                     'IL', 'PPD/PSD', 'CDS-PP',
                     'CH'] 
