@@ -104,79 +104,35 @@ def ajustar_votacao(df_votos, df_sondagem, df_nacional):
 
 
 # Algoritmo Método d'Hondt
-def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
+def metodo_hondt(df_mandatos, df_votos, df_coligacao):
     df_hondt = df_votos.iloc[:0,:].copy()
-
     # Retirar nulos e brancos
-    df_votos  = df_votos[df_votos['partido'].isin(['nulos', 'brancos']) == False].copy(deep = True) 
-
+    df_coligacao = df_coligacao[df_coligacao['partido'].isin(['nulos', 'brancos']) == False].copy(deep = True) 
     # Inicializar mandatos atribuidos e algoritmo 
-    df_votos['mandatos'] = 0 
-    df_votos['votos_dhondt'] = df_votos['votos'] 
+    df_coligacao['mandatos'] = 0 
+    df_coligacao['votos_dhondt'] = df_coligacao['votos'] 
     
     # Para cada distrito:
     for d in df_mandatos.itertuples(): 
         mandatos_d = d.mandatos
-        votos_d = df_votos[df_votos['distrito'] == d.distrito]
+        votos_d = df_coligacao[df_coligacao['distrito'] == d.distrito]
         
         mandatos_atribuidos = 0
-
         # Atribuir mandatos dos círculos distritais
         while mandatos_atribuidos < mandatos_d:
             # Partido a Eleger
             max_v = votos_d[votos_d['partido']!='Outros']['votos_dhondt'].max()
             max_v_index = votos_d[votos_d['votos_dhondt'] == max_v].index[0]
-
             # Atribuir mandato
             votos_d.at[max_v_index, 'mandatos'] += 1
             mandatos_atribuidos += 1
-
             # Recalcular d'Hondt
             votos_d.at[max_v_index, 'votos_dhondt'] = votos_d.at[max_v_index, 'votos'] / (votos_d.at[max_v_index, 'mandatos'] + 1)
         
         # Acrescentar resultados do distrito
         df_hondt = pd.concat([df_hondt, votos_d[df_hondt.columns]], ignore_index = True)
-
-    # Agregar todos os votos a nível nacional (com ou sem estrangeiros)
-    if incluir_estrangeiros:
-        df_compensacao = df_hondt.groupby("partido", as_index=False)[['votos', 'mandatos']].sum()
-    else:
-        df_compensacao = df_hondt[~df_hondt.distrito.isin(['Europa', 'Fora da Europa'])].groupby("partido", as_index=False)[['votos', 'mandatos']].sum()
-
-
-    # Inicializar mandatos atribuidos no circulo de compensacao e algoritmo 
-    df_compensacao['mandatos_compensacao'] = 0
-    df_compensacao['votos_dhondt'] = df_compensacao['votos'] / (df_compensacao['mandatos'] + 1)
-
-    # Atribuir mandatos círculo compensação
-    for _ in range(circ_comp):
-        # É atribuido o novo mandato ao partido com mais votos a dividir por todos os mandatos já atribuídos
-        max_v = df_compensacao[df_compensacao['partido']!='Outros']['votos_dhondt'].max()
-        max_v_index = df_compensacao[df_compensacao['votos_dhondt'] == max_v].index[0]
-
-        # Atribuir mandato
-        df_compensacao.at[max_v_index, 'mandatos'] += 1
-        df_compensacao.at[max_v_index, 'mandatos_compensacao'] += 1
-
-        # Recalcular d'Hondt
-        df_compensacao.at[max_v_index, 'votos_dhondt'] = df_compensacao.at[max_v_index, 'votos'] / (df_compensacao.at[max_v_index, 'mandatos'] + 1)
     
-    # Partidos eleitos no círculo de compensação
-    eleitos_compensacao = df_compensacao[df_compensacao['mandatos_compensacao'] > 0]['partido'].unique()
-
-    # São dados como perdidos os votos que não elegeram ninguém
-    # Se elegeu no círculo de compensação, nenhum voto daquele partido é dado como perdido
-    df_perdidos = df_hondt.loc[(df_hondt['mandatos'] == 0) & (~df_hondt['partido'].isin(eleitos_compensacao))].copy(deep = True)
-    
-    # Adicionar círculo de compensação aos restantes
-    df_compensacao['código'] = 999999
-    df_compensacao['distrito'] = "Compensação"
-    df_compensacao['% votos'] = pd.NA
-    df_compensacao = df_compensacao[['código', 'distrito', 'partido', 'votos', '% votos', 'mandatos_compensacao']]
-    df_compensacao.rename(columns={"mandatos_compensacao": "mandatos"}, inplace=True)
-    df_hondt = pd.concat([df_hondt, df_compensacao], ignore_index=True)
-    
-    return df_hondt, df_perdidos
+    return df_hondt
 
 
 # Função gráfico hemiciclo 
@@ -456,7 +412,7 @@ def main():
 
         df_votos_ajust = ajustar_votacao(df_votos, df_sondagem, df_nacional)
 
-        default_coligacoes = [value for value in ['PPD/PSD', 'IL', 'CDS-PP'] if value in partidos]
+        default_coligacoes = [value for value in ['AD', 'PPD/PSD', 'IL', 'CDS-PP'] if value in partidos]
 
         # Simular uma coligação
         coligacao = st.multiselect(
