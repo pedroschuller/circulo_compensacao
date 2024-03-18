@@ -425,9 +425,9 @@ def main():
             'Évora', 'Faro', 'Guarda', 'Leiria', 'Lisboa', 'Portalegre',
             'Porto', 'Santarém', 'Setúbal', 'Viana do Castelo', 'Vila Real',
             'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'],
-            ['Beja', 'Bragança', 'Castelo Branco', 'Coimbra',
-            'Évora', 'Guarda', 'Portalegre',
-            'Santarém', 'Viana do Castelo', 'Vila Real',
+            ['Aveiro', 'Beja', 'Braga', 'Bragança', 'Castelo Branco', 'Coimbra',
+            'Évora', 'Faro', 'Guarda', 'Leiria', 'Lisboa', 'Portalegre',
+            'Porto', 'Santarém', 'Setúbal', 'Viana do Castelo', 'Vila Real',
             'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'])
 
         df_coligacao = coligar(df_votos_ajust, coligacao, distritos_coligacao)
