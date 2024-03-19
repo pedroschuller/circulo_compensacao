@@ -30,6 +30,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+@st.cache_data
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv().encode('utf_8_sig')
 
 # Limpar dados base
 def obter_base(path, ano):
@@ -361,7 +365,11 @@ def simular_eleicao(df_mandatos, df_votos, df_votos_ajust, df_coligacao, eleicao
     df_votos_ajust = metodo_hondt(df_mandatos, df_votos, df_votos_ajust)    
 
     df_coligacao = metodo_hondt(df_mandatos, df_votos, df_coligacao)    
-    
+
+    csv = convert_df(df_coligacao)
+
+    st.download_button('Download CSV', csv, 'coligacao.csv', 'text/csv')
+
     plot_comparacao(df_votos_ajust, df_coligacao, eleicao, coligacao)
 
     pass
@@ -404,6 +412,16 @@ def main():
     st.write("Inserir sondagem:")
     df_sondagem = st.data_editor(df_a_editar, disabled = ['partido'], hide_index = True)
 
+    # df_sondagem.loc[df_sondagem['partido']=='AD', 'votação'] = 33
+    # df_sondagem.loc[df_sondagem['partido']=='PS', 'votação'] = 26.7 
+    # df_sondagem.loc[df_sondagem['partido']=='CH', 'votação'] = 15 
+    # df_sondagem.loc[df_sondagem['partido']=='IL', 'votação'] = 6.6 
+    # df_sondagem.loc[df_sondagem['partido']=='B.E.', 'votação'] = 4.5 
+    # df_sondagem.loc[df_sondagem['partido']=='PCP-PEV', 'votação'] = 3.3 
+    # df_sondagem.loc[df_sondagem['partido']=='L', 'votação'] = 3.3 
+    # df_sondagem.loc[df_sondagem['partido']=='PAN', 'votação'] = 1.9 
+    # df_sondagem.loc[df_sondagem['partido']=='Outros', 'votação'] = 5.8 
+
     checksum = sum(df_sondagem['votação'])
 
     if((checksum > 101.0) | (checksum < 99.0)):
@@ -431,6 +449,7 @@ def main():
             'Viseu', 'Madeira', 'Açores', 'Europa', 'Fora da Europa'])
 
         df_coligacao = coligar(df_votos_ajust, coligacao, distritos_coligacao)
+        
         simular_eleicao(df_mandatos, df_votos, df_votos_ajust, df_coligacao, eleicao, coligacao)
 
     st.divider()
