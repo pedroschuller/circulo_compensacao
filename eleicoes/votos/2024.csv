@@ -1,4 +1,4 @@
-﻿código,distrito,partido,votos,% votos,mandatos
+﻿código,distrito,partido,votos,%votos,mandatos
 10000,Aveiro,AD,148861,35.13,7
 10000,Aveiro,PS,117348,27.69,5
 10000,Aveiro,CH,73110,17.25,3
@@ -42,17 +42,17 @@
 40000,Bragança,L,727,1,0
 40000,Bragança,Outros,1244,1.7,0
 40000,Bragança,nulos,1862,2.56,0
-50000,Castelo Branco,PS,37052,34.22,2
-50000,Castelo Branco,AD,30803,28.45,1
-50000,Castelo Branco,CH,21131,19.52,1
-50000,Castelo Branco,B.E.,4451,4.11,0
-50000,Castelo Branco,IL,2959,2.73,0
-50000,Castelo Branco,PCP-PEV,2372,2.19,0
-50000,Castelo Branco,L,2171,2.01,0
-50000,Castelo Branco,ADN,1491,1.38,0
-50000,Castelo Branco,PAN,1427,1.32,0
-50000,Castelo Branco,Outros,1391,1.29,0
-50000,Castelo Branco,nulos,3020,2.79,0
+50000,CasteloBranco,PS,37052,34.22,2
+50000,CasteloBranco,AD,30803,28.45,1
+50000,CasteloBranco,CH,21131,19.52,1
+50000,CasteloBranco,B.E.,4451,4.11,0
+50000,CasteloBranco,IL,2959,2.73,0
+50000,CasteloBranco,PCP-PEV,2372,2.19,0
+50000,CasteloBranco,L,2171,2.01,0
+50000,CasteloBranco,ADN,1491,1.38,0
+50000,CasteloBranco,PAN,1427,1.32,0
+50000,CasteloBranco,Outros,1391,1.29,0
+50000,CasteloBranco,nulos,3020,2.79,0
 60000,Coimbra,PS,79086,32.67,4
 60000,Coimbra,AD,74019,30.58,3
 60000,Coimbra,CH,37412,15.46,2
@@ -160,27 +160,27 @@
 150000,Setúbal,ADN,7661,1.52,0
 150000,Setúbal,Outros,7705,1.54,0
 150000,Setúbal,nulos,11330,2.25,0
-160000,Viana do Castelo,AD,49613,34.72,2
-160000,Viana do Castelo,PS,40237,28.15,2
-160000,Viana do Castelo,CH,26635,18.64,1
-160000,Viana do Castelo,IL,5106,3.57,0
-160000,Viana do Castelo,B.E.,4926,3.45,0
-160000,Viana do Castelo,PCP-PEV,3106,2.17,0
-160000,Viana do Castelo,L,2813,1.97,0
-160000,Viana do Castelo,ADN,2263,1.58,0
-160000,Viana do Castelo,PAN,2057,1.44,0
-160000,Viana do Castelo,Outros,1936,1.35,0
-160000,Viana do Castelo,nulos,4221,2.96,0
-170000,Vila Real,AD,46040,39.33,2
-170000,Vila Real,PS,34654,29.6,2
-170000,Vila Real,CH,20032,17.11,1
-170000,Vila Real,ADN,2958,2.53,0
-170000,Vila Real,B.E.,2865,2.45,0
-170000,Vila Real,IL,2378,2.03,0
-170000,Vila Real,PCP-PEV,1599,1.37,0
-170000,Vila Real,L,1592,1.36,0
-170000,Vila Real,Outros,1898,1.62,0
-170000,Vila Real,nulos,3040,2.6,0
+160000,VianadoCastelo,AD,49613,34.72,2
+160000,VianadoCastelo,PS,40237,28.15,2
+160000,VianadoCastelo,CH,26635,18.64,1
+160000,VianadoCastelo,IL,5106,3.57,0
+160000,VianadoCastelo,B.E.,4926,3.45,0
+160000,VianadoCastelo,PCP-PEV,3106,2.17,0
+160000,VianadoCastelo,L,2813,1.97,0
+160000,VianadoCastelo,ADN,2263,1.58,0
+160000,VianadoCastelo,PAN,2057,1.44,0
+160000,VianadoCastelo,Outros,1936,1.35,0
+160000,VianadoCastelo,nulos,4221,2.96,0
+170000,VilaReal,AD,46040,39.33,2
+170000,VilaReal,PS,34654,29.6,2
+170000,VilaReal,CH,20032,17.11,1
+170000,VilaReal,ADN,2958,2.53,0
+170000,VilaReal,B.E.,2865,2.45,0
+170000,VilaReal,IL,2378,2.03,0
+170000,VilaReal,PCP-PEV,1599,1.37,0
+170000,VilaReal,L,1592,1.36,0
+170000,VilaReal,Outros,1898,1.62,0
+170000,VilaReal,nulos,3040,2.6,0
 180000,Viseu,AD,76927,36.36,3
 180000,Viseu,PS,58077,27.45,3
 180000,Viseu,CH,41159,19.45,2
@@ -214,3 +214,25 @@
 400000,Açores,PCP-PEV,1160,1.09,0
 400000,Açores,Outros,1346,1.27,0
 400000,Açores,nulos,3691,3.48,0
+800000,Europa,AD,33350,14.21,1
+800000,Europa,PS,38061,16.22,1
+800000,Europa,CH,42972,18.31,0
+800000,Europa,B.E.,6438,2.74,0
+800000,Europa,IL,5719,2.44,0
+800000,Europa,L,4091,1.74,0
+800000,Europa,PAN,5174,2.20,0
+800000,Europa,PCP-PEV,2363,1.01,0
+800000,Europa,ADN,953,0.41,0
+800000,Europa,Outros,3835,1.63,0
+800000,Europa,nulos,91698,39.08,0
+900000,Fora da Europa,AD,22636,22.90,1
+900000,Fora da Europa,PS,14410,14.58,0
+900000,Fora da Europa,CH,18067,18.27,1
+900000,Fora da Europa,B.E.,1847,1.87,0
+900000,Fora da Europa,IL,1902,1.92,0
+900000,Fora da Europa,L,697,0.70,0
+900000,Fora da Europa,PAN,2332,2.36,0
+900000,Fora da Europa,PCP-PEV,748,0.76,0
+900000,Fora da Europa,ADN,1128,1.14,0
+900000,Fora da Europa,Outros,2604,2.63,0
+900000,Fora da Europa,nulos,32495,32.87,0
