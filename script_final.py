@@ -24,7 +24,12 @@ mapping_partidos = {'E':'PNR',
                     'PCTP/MRPP':'MRPP'}
 
 # Partidos da esquerda para a direita (discutível mas suficiente)
-ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', 'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', 'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', 'PPD/PSD', 'IL', 'A', 'CDS-PP', 'PPM', 'PND', 'CH', 'ADN', 'PNR']
+ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
+                  'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
+                  'P.H.', 'MPT', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
+                  'IL', 'PPD/PSD', 'AD', 'A', 'CDS-PP', 'PPM', #centro-direita
+                  'PND', 'CH', 'ADN', 'PNR', #direita
+                  'Outros'] 
 
 # Abreviar distritos para o plot
 mapping_distritos = {'Castelo Branco':'C. Branco',
@@ -33,7 +38,13 @@ mapping_distritos = {'Castelo Branco':'C. Branco',
                      'Compensação':'Comp.'}
 
 # Cores aproximadas dos partidos em RGBA
-cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 'orange', 'cyan', 'cyan', 'blue', 'darkblue', 'red', 'darkblue', 'yellow', 'red']
+cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 
+         'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
+         'orange', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
+         'cyan', 'orange', 'orange', 'cyan', 'blue', 'darkblue', 
+         'red', 'darkblue', 'yellow', 'red',
+         'grey']
+
 df_cores = pd.DataFrame(cores, ordem_partidos, columns = ['cor'])
 
 
@@ -180,6 +191,7 @@ def calcular_desvio(df_votos):
     return df_votos_nacional, soma_dos_desvios
 
 
+
 # Algoritmo Método d'Hondt
 def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
     df_hondt = df_votos.iloc[:0,:].copy()
@@ -201,7 +213,7 @@ def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
         # Atribuir mandatos dos círculos distritais
         while mandatos_atribuidos < mandatos_d:
             # Partido a Eleger
-            max_v = votos_d['votos_dhondt'].max()
+            max_v = votos_d[votos_d['partido']!='Outros']['votos_dhondt'].max()
             max_v_index = votos_d[votos_d['votos_dhondt'] == max_v].index[0]
 
             # Atribuir mandato
@@ -228,7 +240,7 @@ def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
     # Atribuir mandatos círculo compensação
     for _ in range(circ_comp):
         # É atribuido o novo mandato ao partido com mais votos a dividir por todos os mandatos já atribuídos
-        max_v = df_compensacao['votos_dhondt'].max()
+        max_v = df_compensacao[df_compensacao['partido']!='Outros']['votos_dhondt'].max()
         max_v_index = df_compensacao[df_compensacao['votos_dhondt'] == max_v].index[0]
 
         # Atribuir mandato
@@ -654,12 +666,12 @@ incluir_estrangeiros = True
 tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
 
 # Simular sequência de tamanhos do círculo de compensação (min, max+1, [step])
-#lista_tamanhos_cc = range(0, tamanho_maximo_circulo_compensacao+1, 1)
+lista_tamanhos_cc = range(0, tamanho_maximo_circulo_compensacao+1, 1)
 
 ## OU ##
 
 # Simular um tamanho
-lista_tamanhos_cc = [40]
+#lista_tamanhos_cc = [40]
 
 # Listar eleições a simular
 eleicoes = os.listdir('eleicoes')
