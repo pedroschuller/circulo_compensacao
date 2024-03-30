@@ -26,7 +26,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.title("Círculo de Compensação Nacional")
 st.header("Simulação da introdução de um mecanismo de compensação nas eleições legislativas")
-#st.image('./votos_que_contam.png')
+st.image('./votos_que_contam.png')
 st.write("O sistema eleitoral português enfrenta, há décadas, desafios críticos que necessitam de uma atenção urgente e ponderada. Um dos problemas mais prementes é o desperdício significativo de votos, uma realidade que não só desvirtua a verdadeira vontade expressa nas urnas pelos cidadãos, como também alimenta o fenómeno preocupante do voto útil ou táctico. Este cenário, onde centenas de milhares de votos não contribuem para a eleição de qualquer deputado, mina a confiança no sistema democrático, favorecendo desproporcionalmente os partidos maiores, em detrimento de uma representação parlamentar verdadeiramente plural e reflectiva da diversidade política do eleitorado.")
 
 st.write("A Iniciativa Liberal, consciente desta problemática, propôs uma solução ambiciosa e equitativa: a introdução de um círculo nacional de compensação. Esta proposta visa garantir que cada voto conta, independentemente do distrito a que pertence, promovendo um sistema eleitoral mais justo, proporcional e alinhado com o espírito da Constituição da República Portuguesa. Este mecanismo permitiria uma distribuição de mandatos mais fiel às preferências dos eleitores, incentivando a participação cívica e fortalecendo a legitimidade dos representantes eleitos.")
@@ -121,7 +121,7 @@ def obter_votos(df_total):
 
 
 # Retirar mandatos aos círculos distritais para o de compensacao
-def reduzir(df, tam_circ_comp, min_circ):
+def reduzir(df, tamanho_cc, min_circ):
     df = df.copy()
     mandatos_atuais = sum(df["mandatos"])
 
@@ -132,7 +132,7 @@ def reduzir(df, tam_circ_comp, min_circ):
     # Se o tamanho mínimo deu deputados, temos que os retirar de outro circulo
     mandatos_a_retirar = mandatos_corrigidos - mandatos_atuais 
 
-    for _ in range(tam_circ_comp + int(mandatos_a_retirar)): 
+    for _ in range(tamanho_cc + int(mandatos_a_retirar)): 
         # Eleitores por deputado
         df["eleitores_por_mandato"] = df["inscritos"] / df["mandatos"] 
         # Círculos que já não podem perder mais
@@ -145,7 +145,7 @@ def reduzir(df, tam_circ_comp, min_circ):
     return df
 
 # Algoritmo Método d'Hondt
-def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
+def metodo_hondt(df_mandatos, df_votos, tamanho_cc, incluir_estrangeiros = True):
     df_hondt = df_votos.iloc[:0,:].copy()
 
     # Retirar nulos e brancos
@@ -190,7 +190,7 @@ def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
     df_compensacao['votos_dhondt'] = df_compensacao['votos'] / (df_compensacao['mandatos'] + 1)
 
     # Atribuir mandatos círculo compensação
-    for _ in range(circ_comp):
+    for _ in range(tamanho_cc):
         # É atribuido o novo mandato ao partido com mais votos a dividir por todos os mandatos já atribuídos
         max_v = df_compensacao[df_compensacao['partido']!='Outros']['votos_dhondt'].max()
         max_v_index = df_compensacao[df_compensacao['votos_dhondt'] == max_v].index[0]
@@ -206,8 +206,13 @@ def metodo_hondt(df_mandatos, df_votos, circ_comp, incluir_estrangeiros = True):
     eleitos_compensacao = df_compensacao[df_compensacao['mandatos_compensacao'] > 0]['partido'].unique()
 
     # São dados como perdidos os votos que não elegeram ninguém
-    # Se elegeu no círculo de compensação, nenhum voto daquele partido é dado como perdido
-    df_perdidos = df_hondt.loc[(df_hondt['mandatos'] == 0) & (~df_hondt['partido'].isin(eleitos_compensacao))].copy(deep = True)
+    # Se elegeu no círculo de compensação, nenhum voto daquele partido nos círculos que contam para a compensação é dado como perdido
+    if incluir_estrangeiros:
+        df_perdidos = df_hondt.loc[(df_hondt['mandatos'] == 0) & (~df_hondt['partido'].isin(eleitos_compensacao))].copy(deep = True)
+    else: 
+        df_perdidos = df_hondt.loc[(df_hondt['mandatos'] == 0) & ((~df_hondt['partido'].isin(eleitos_compensacao)) | (df_hondt['código']>500000))].copy(deep = True)
+
+
     
     # Adicionar círculo de compensação aos restantes
     df_compensacao['código'] = 999999
@@ -327,6 +332,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     plt.setp(axs[0], xlim=(0,xlim))
     plt.setp(axs[1], xlim=(0,xlim))
     fig.suptitle("Quantos votos seriam necessários para eleger um deputado?")
+    plt.show()
     st.pyplot(fig)
 
 
@@ -377,6 +383,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     axs[1].set_xlabel('Mandatos por distrito')
     axs[1].set_title('Círculo de Compensação')
     fig.suptitle("Como ficariam os círculos eleitorais?")
+    plt.show()
     st.pyplot(fig)
 
     
@@ -411,6 +418,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     plt.setp(axs[1], xlim=(0,100))
 
     fig.suptitle("Que percentagem de votos não serve para eleger ninguém, por distrito?")
+    plt.show()
     st.pyplot(fig)
 
 
@@ -439,6 +447,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     plt.setp(axs[0], xlim=(0,xlim))
     plt.setp(axs[1], xlim=(0,xlim))
     fig.suptitle("Quantos votos não servem para eleger ninguém, por distrito?")
+    plt.show()
     st.pyplot(fig)
 
 
@@ -465,6 +474,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
                         color=label_color, va='center', ha='right' if width <= 75 else 'left')
 
     fig.suptitle("Que percentagem de votos, por partido, não servem para nada?")
+    plt.show()
     st.pyplot(fig)
 
      
@@ -484,6 +494,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     plt.setp(axs[0], ylim=(0,ylim))
     plt.setp(axs[1], ylim=(0,ylim))
     fig.suptitle('Quantos votos se perdem, no total?')
+    plt.show()
     st.pyplot(fig)
 
 
@@ -514,9 +525,9 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
 
     df_perdidos  = simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
 
-    url = 'https://www.parlamento.pt/ActividadeParlamentar/Paginas/DetalheIniciativa.aspx?BID=243359'
+    url = 'https://www.parlamento.pt/ActividadeParlamentar/Paginas/DetalheIniciativa.aspx?BID=263540'
     st.write("Não se pode continuar a ignorar o elefante na sala do nosso sistema eleitoral. É crucial agir para fortalecer a nossa democracia, garantindo que cada voto conta. Convido todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar esta [proposta](%s) detalhada no site do Parlamento Português. Não há portugueses de segunda, não pode haver votos de segunda." % url)
-    #st.image('./votos_que_contam.png')
+    st.image('./votos_que_contam.png')
     st.divider()
     st.write('\u00a9 Pedro Schuller 2024')  
 
@@ -537,7 +548,7 @@ incluir_estrangeiros = st.toggle('Votos nos círculos eleitorais internacionais 
 tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
 
 # Simular um tamanho 
-tamanho_cc = st.slider('Número de deputados no círculo de compensação nacional', 0, tamanho_maximo_circulo_compensacao, 40)
+tamanho_cc = st.slider('Número de deputados no círculo de compensação nacional', 0, tamanho_maximo_circulo_compensacao, 30)
 
 if __name__ == "__main__":
    main(eleicao, tamanho_circulo_minimo, tamanho_cc, incluir_estrangeiros)
