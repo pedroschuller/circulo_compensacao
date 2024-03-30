@@ -27,9 +27,13 @@ st.markdown("""
 st.title("Círculo de Compensação Nacional")
 st.header("Simulação da introdução de um mecanismo de compensação nas eleições legislativas")
 st.image('./votos_que_contam.png')
+
+
 st.write("O sistema eleitoral português enfrenta, há décadas, desafios críticos que necessitam de uma atenção urgente e ponderada. Um dos problemas mais prementes é o desperdício significativo de votos, uma realidade que não só desvirtua a verdadeira vontade expressa nas urnas pelos cidadãos, como também alimenta o fenómeno preocupante do voto útil ou táctico. Este cenário, onde centenas de milhares de votos não contribuem para a eleição de qualquer deputado, mina a confiança no sistema democrático, favorecendo desproporcionalmente os partidos maiores, em detrimento de uma representação parlamentar verdadeiramente plural e reflectiva da diversidade política do eleitorado.")
 
+
 st.write("A Iniciativa Liberal, consciente desta problemática, propôs uma solução ambiciosa e equitativa: a introdução de um círculo nacional de compensação. Esta proposta visa garantir que cada voto conta, independentemente do distrito a que pertence, promovendo um sistema eleitoral mais justo, proporcional e alinhado com o espírito da Constituição da República Portuguesa. Este mecanismo permitiria uma distribuição de mandatos mais fiel às preferências dos eleitores, incentivando a participação cívica e fortalecendo a legitimidade dos representantes eleitos.")
+
 
 st.write("Para ilustrar de forma clara e transparente o impacto desta proposta, esta ferramenta permite visualizar, de maneira intuitiva e fundamentada, como a introdução de um círculo de compensação nacional poderia ter alterado os resultados das eleições legislativas desde 2005. Convido-te a compreender a profundidade da questão e a juntares-te na defesa de um sistema eleitoral que verdadeiramente honre os princípios democráticos de representatividade e proporcionalidade.")
 
@@ -46,6 +50,7 @@ mapping_partidos = {'E':'PNR',
                     'PPD/PSD.CDS-PP.PPM':'AD',
                     'PCTP/MRPP':'MRPP'}
 
+
 # Partidos da esquerda para a direita (discutível mas suficiente)
 ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
                   'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
@@ -55,7 +60,7 @@ ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
                   'Outros'] 
                    
 
-# Abreviar distritos para o plot
+# Abreviar círculos eleitorais para o plot
 mapping_distritos = {'Castelo Branco':'C. Branco',
                      'Viana do Castelo': 'V. Castelo',
                      'Fora da Europa':'F. Europa',
@@ -336,14 +341,14 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     st.pyplot(fig)
 
 
-    # Reorganização de mandatos por distrito
+    # Reorganização de mandatos por círculo eleitoral
     st.write("Com a introdução de um círculo nacional de compensação, a distribuição de mandatos entre os distritos eleitorais sofre algumas alterações para assegurar a proporcionalidade. Neste modelo, os mandatos destinados ao círculo de compensação são extraídos incrementalmente dos distritos eleitorais existentes. O processo inicia-se pela transferência de um mandato do distrito que apresenta o menor rácio de votos por deputado eleito, promovendo assim uma redistribuição ponderada. Este procedimento é repetido até que o número total de mandatos no círculo de compensação seja atingido. Importante salientar que, durante este processo de realocação, cada distrito eleitoral mantém, no mínimo, dois mandatos, garantindo que todas as regiões continuem a ter uma representação parlamentar básica. Esta abordagem visa não apenas preservar a representatividade de cada distrito, mas também criar um mecanismo de compensação que reflete de forma mais precisa e justa a vontade expressa pelos eleitores em todo o território nacional.")
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_reorganizacao_mandatos.sort_values(['mandatos', 'mandatos_cc'], inplace = True)
     df_reorganizacao_mandatos['distrito'].replace(mapping_distritos, inplace = True)
     hbar=axs[0].barh(df_reorganizacao_mandatos.distrito, df_reorganizacao_mandatos.mandatos)
     axs[0].bar_label(hbar)
-    axs[0].set_xlabel('Mandatos por distrito')
+    axs[0].set_xlabel('Mandatos por círculo eleitoral')
     axs[0].set_title('Atual')
     axs[1].barh(df_reorganizacao_mandatos.distrito, df_reorganizacao_mandatos.mandatos_cc)
     cores_mandatos = ['red']*(len(df_reorganizacao_mandatos)-1)
@@ -380,14 +385,14 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
             # Add text label for 'diferenca' outside the bar segment
             axs[1].text(label_x_pos_diff, index, label_diff, color=color_diff, ha='left', va='center')
 
-    axs[1].set_xlabel('Mandatos por distrito')
+    axs[1].set_xlabel('Mandatos por círculo eleitoral')
     axs[1].set_title('Círculo de Compensação')
     fig.suptitle("Como ficariam os círculos eleitorais?")
     plt.show()
     st.pyplot(fig)
 
     
-    # Votos perdidos (em percentagem) por distrito
+    # Votos perdidos (em percentagem) por círculo eleitoral
     st.write("Os distritos mais pequenos do interior, ilhas e estrangeiro enfrentam uma taxa de desperdício de votos inaceitável, uma realidade que compromete gravemente a equidade e a integridade do processo democrático nestas regiões. Devido à sua menor densidade populacional e ao consequente número reduzido de mandatos atribuídos, muitos votos nestes distritos não resultam na eleição de representantes, sendo, na prática, votos inutilizados. Este cenário não só desfavorece os eleitores destas áreas, que veem a sua voz diluída no conjunto nacional, como também alimenta um ciclo de desencanto e apatia política, dado que os cidadãos podem sentir que seu voto tem um impacto limitado ou nulo.")
     df_distritos = df_distritos[~df_distritos.index.isin(['Compensação'])]
     df_distritos.rename(index = mapping_distritos, inplace = True)
@@ -403,7 +408,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     # Iterate over the columns and titles to create the subplots
     for i, (col, title) in enumerate(zip(columns, titles)):
         bars = axs[i].barh(df_distritos.index, df_distritos[col])
-        axs[i].set_xlabel('Votos perdidos por distrito (%)')
+        axs[i].set_xlabel('Votos perdidos por círculo eleitoral (%)')
         axs[i].set_title(title)
             
         # Add labels with 'k' format to bars
@@ -417,12 +422,12 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     plt.setp(axs[0], xlim=(0,100))
     plt.setp(axs[1], xlim=(0,100))
 
-    fig.suptitle("Que percentagem de votos não serve para eleger ninguém, por distrito?")
+    fig.suptitle("Que percentagem de votos não serve para eleger ninguém, por círculo eleitoral?")
     plt.show()
     st.pyplot(fig)
 
 
-    # Votos perdidos por distrito
+    # Votos perdidos por círculo eleitoral
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
 
     # Define the columns and titles to iterate over
@@ -431,7 +436,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     # Iterate over the columns and titles to create the subplots
     for i, (col, title) in enumerate(zip(columns, titles)):
         bars = axs[i].barh(df_distritos.index, df_distritos[col])
-        axs[i].set_xlabel('Votos perdidos por distrito')
+        axs[i].set_xlabel('Votos perdidos por círculo eleitoral')
         axs[i].set_title(title)
             
         # Add labels with 'k' format to bars
@@ -446,7 +451,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     xlim = np.ceil(np.max(df_distritos['votos_perdidos'])/10000)*10000
     plt.setp(axs[0], xlim=(0,xlim))
     plt.setp(axs[1], xlim=(0,xlim))
-    fig.suptitle("Quantos votos não servem para eleger ninguém, por distrito?")
+    fig.suptitle("Quantos votos não servem para eleger ninguém, por círculo eleitoral?")
     plt.show()
     st.pyplot(fig)
 
@@ -530,7 +535,6 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
     st.image('./votos_que_contam.png')
     st.divider()
     st.write('\u00a9 Pedro Schuller 2024')  
-
 
 
 # Listar eleições a simular
