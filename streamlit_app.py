@@ -57,7 +57,7 @@ mapping_partidos = {'E':'PNR',
 ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
                   'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
                   'P.H.', 'MPT', 'MPT/A', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
-                  'IL', 'PPD/PSD', 'AD', 'A', 'CDS-PP', 'PPM', #centro-direita
+                  'PPD/PSD', 'AD', 'IL', 'A', 'CDS-PP', 'PPM', #centro-direita
                   'PND', 'ND', 'CH', 'ADN', 'PNR', #direita
                   'Outros'] 
                    
@@ -72,7 +72,7 @@ mapping_distritos = {'Castelo Branco':'C. Branco',
 cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 
          'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
          'orange', 'green', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
-         'cyan', 'orange', 'orange', 'cyan', 'blue', 'darkblue', 
+         'orange', 'orange', 'cyan', 'cyan', 'blue', 'darkblue', 
          'red', 'darkblue', 'darkblue', 'yellow', 'red',
          'grey']
 
