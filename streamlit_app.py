@@ -11,6 +11,8 @@ import numpy as np
 import streamlit as st
 
 pd.set_option('mode.use_inf_as_na', False)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
 
 # Configs streamlit
 st.set_page_config(page_title="Círculo de Compensação Nacional")
@@ -148,6 +150,7 @@ def reduzir(df, tamanho_cc, min_circ):
         df.iloc[0, df.columns.get_loc("mandatos")] -= 1  
     
     return df
+
 
 # Algoritmo Método d'Hondt
 def metodo_hondt(df_mandatos, df_votos, tamanho_cc, incluir_estrangeiros = True):
@@ -554,7 +557,6 @@ tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tam
 # Simular um tamanho 
 tamanho_cc = st.slider('Número de deputados no círculo de compensação nacional', 0, tamanho_maximo_circulo_compensacao, 30)
 
+
 if __name__ == "__main__":
    main(eleicao, tamanho_circulo_minimo, tamanho_cc, incluir_estrangeiros)
-
-   
