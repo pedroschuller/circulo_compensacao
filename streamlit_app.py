@@ -463,6 +463,7 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     st.write("Os partidos maiores em Portugal beneficiam significativamente do atual sistema eleitoral, sendo capazes de converter uma maior percentagem de votos a eles atribuídos em representantes eleitos. Este fenómeno contrasta acentuadamente com a realidade enfrentada pelos partidos menores, nos quais um número considerável de votos acaba por não se traduzir em mandatos, resultando em uma representação parlamentar que não espelha de forma justa o apoio popular que recebem. Esta discrepância amplifica o poder dos partidos dominantes, enquanto marginaliza e limita a influência de vozes políticas emergentes ou minoritárias, comprometendo a pluralidade e a diversidade essenciais para uma democracia robusta e vibrante.")
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     df_merge_votos.sort_values(['%votos_nao_convertidos', 'votos'], ascending=[False, True], inplace=True)
+    hbar_colors = cores_usar.reindex(df_merge_votos.index.values)
 
     # Define the columns and titles to iterate over
     columns = ['%votos_nao_convertidos', '%votos_nao_convertidos_cc']
