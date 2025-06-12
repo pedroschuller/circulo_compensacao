@@ -538,7 +538,7 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
     st.write("Não se pode continuar a ignorar o elefante na sala do nosso sistema eleitoral. É crucial agir para fortalecer a nossa democracia, garantindo que cada voto conta. Convido todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar esta [proposta](%s) detalhada no site do Parlamento Português. Não há portugueses de segunda, não pode haver votos de segunda." % url)
     st.image('./votos_que_contam.png')
     st.divider()
-    st.write('\u00a9 Pedro Schuller 2024')  
+    st.write('\u00a9 Pedro Schuller 2025')  
 
 
 # Listar eleições a simular
