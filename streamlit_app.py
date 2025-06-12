@@ -56,7 +56,7 @@ mapping_partidos = {'E':'PNR',
 # Partidos da esquerda para a direita (discutível mas suficiente)
 ordem_partidos = ['MAS', 'B.E.', 'MRPP', 'POUS', 'PCP-PEV', 'PTP', #esquerda
                   'L', 'PS', 'JPP', 'PAN', 'PURP', 'VP',  'R.I.R.', #centro-esquerda
-                  'P.H.', 'MPT', 'MPT.A', 'NC', 'MMS', 'MEP', 'PDA', 'PDR', #centro
+                  'P.H.', 'MPT', 'MPT.A', 'NC', 'MMS', 'MEP', 'PLS', 'PDA', 'PDR', #centro
                   'PPD/PSD', 'AD', 'IL', 'A', 'CDS-PP', 'PPM', #centro-direita
                   'PND', 'ND', 'CH', 'ADN', 'PNR', #direita
                   'Outros'] 
@@ -71,7 +71,7 @@ mapping_distritos = {'Castelo Branco':'C. Branco',
 # Cores aproximadas dos partidos em RGBA
 cores = ['black', 'black', 'darkred', 'darkred', 'red', 'darkred', 
          'lightgreen', 'pink', 'lightgreen', 'green', 'orange', 'purple',  'green', 
-         'orange', 'green', 'green', 'yellow', 'darkblue', 'green', 'blue', 'black', 
+         'orange', 'green', 'green', 'yellow', 'darkblue', 'green', 'yellow', 'blue', 'black', 
          'orange', 'orange', 'cyan', 'cyan', 'blue', 'darkblue', 
          'red', 'darkblue', 'darkblue', 'yellow', 'red',
          'grey']
@@ -550,7 +550,7 @@ eleicao = st.selectbox(
 tamanho_circulo_minimo = 2
 
 # Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação? 
-incluir_estrangeiros = st.toggle('Votos nos círculos eleitorais internacionais contam para o círculo nacional de compensação?', value = True)
+incluir_estrangeiros = st.toggle('Votos nos círculos eleitorais internacionais contam para o círculo nacional de compensação?', value = False)
 
 # simulação não pode retirar mais deputados do que o mínimo 
 tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
