@@ -544,7 +544,7 @@ def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_es
 # Listar eleições a simular
 eleicao = st.selectbox(
     'Que eleição deseja simular?',
-    ('2024', '2022', '2019', '2015', '2011', '2009', '2005'))
+    ('2025', '2024', '2022', '2019', '2015', '2011', '2009', '2005'))
 
 # Mínimo de mandatos por círculo distrital
 tamanho_circulo_minimo = 2
