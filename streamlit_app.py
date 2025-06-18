@@ -596,7 +596,7 @@ def simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, e
     else: 
         df_reduzido = reduzir(df_mandatos, tamanho_cc, tamanho_circulo_minimo)
         df_simulacao, df_perdidos = metodo_hondt(df_reduzido, df_votos, tamanho_cc, incluir_estrangeiros)
-        plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, t)
+        plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, tamanho_cc)
 
 
 # Convert numbers to 'k' format
