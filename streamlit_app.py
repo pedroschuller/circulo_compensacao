@@ -233,6 +233,23 @@ def metodo_hondt(df_mandatos, df_votos, tamanho_cc, incluir_estrangeiros = True)
     return df_hondt, df_perdidos
 
 
+# Calcular desvio de proporcionalidade entre votos e deputados
+def calcular_desvio(df_votos):
+    # Agregar votos totais
+    df_votos_nacional = df_votos[~df_votos.partido.isin(["brancos", "nulos"])].groupby("partido", as_index =False)[['votos', 'mandatos']].sum()
+
+    # Proporção de votos
+    df_votos_nacional["%votos"] = df_votos_nacional["votos"]/sum(df_votos_nacional["votos"]) 
+    # Proporção de mandatos 
+    df_votos_nacional["%mandatos"] = df_votos_nacional["mandatos"]/sum(df_votos_nacional["mandatos"]) 
+    # Desvio absoluto entre os 2
+    df_votos_nacional["desvio"] = abs(df_votos_nacional["%votos"]-df_votos_nacional["%mandatos"]) 
+    # Desvio total
+    soma_dos_desvios = sum(df_votos_nacional["desvio"]) 
+
+    return soma_dos_desvios
+
+
 # Função gráfico hemiciclo 
 def plot_hemiciclo(ax, mandatos, votos, cores, title, ordem_partidos):
     mandatos = np.append(mandatos, np.sum(mandatos))
@@ -507,18 +524,79 @@ def plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzid
     st.pyplot(fig)
 
 
+# Desenhar gráfico com votos perdidos e desvio de proporcionalidade por tamanho do círculo de compensação
+def plot_desvios(df_desvios, eleicao):
+
+    url = 'https://www.parlamento.pt/ActividadeParlamentar/Paginas/DetalheIniciativa.aspx?BID=263540'
+    st.write("Convido todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar esta [proposta](%s) detalhada no site do Parlamento Português.A Iniciativa Liberal propõe a criação de um círculo nacional de compensação de 30 deputados como explicado anteriormente. Porquê 30? A ilustração em baixo permite compreender de que forma é que a desproporcionalidade do sistema evolui em função do tamanho deste círculo. Um círculo de 30 deputados teria permitido, nas eleições anteriores, reduzir os votos perdidos e a desproporcionalidade do sistema até ao limite do possível, sem retirar mandatos aos círculos distritais para além do necessário." % url)
+
+
+    # Criar 2 plots
+    fig, (ax0, ax1) = plt.subplots(2,1,figsize = (10, 5)) 
+
+    # Tornar nomes mais legíveis
+    df_desvios_nomes = df_desvios.rename(columns={"circulo_compensacao":"Tamanho do Círculo de Compensação"
+                                                  , "desvio_proporcionalidade":"Desvio de proporcionalidade (%)"
+                                                  , "votos_perdidos": "Votos perdidos"})
+
+    # Dados detalhe
+    df_desvios_focus = df_desvios_nomes.loc[df_desvios_nomes['Tamanho do Círculo de Compensação']<=55]
+
+    # Definir valor máximo do eixo dos y
+    max_y = max([-(-int(max(df_desvios_focus['Desvio de proporcionalidade (%)'])+1)//5)*5, -(-int(max(df_desvios_focus['Votos perdidos'])+1)//125000)*5])
+    max_y2 = max_y * 25000
+
+    # Gráfico total
+    df_desvios_nomes.plot(x = 'Tamanho do Círculo de Compensação', y = 'Desvio de proporcionalidade (%)', ax = ax0, mark_right = False,  title = eleicao, ylim = (0, max_y), yticks = range(0,max_y+5,5), ) 
+    df_desvios_nomes.plot(x = 'Tamanho do Círculo de Compensação', y = 'Votos perdidos', ax = ax0, secondary_y = True, mark_right = False, label = 'Votos perdidos (eixo direita)', ylim = (0, max_y2), yticks = range(0,max_y2+125000,125000))  
+    ax0.set(xlabel=None)
+
+    # Gráfico detalhe
+    df_desvios_focus.plot(x = 'Tamanho do Círculo de Compensação', y = 'Desvio de proporcionalidade (%)', ax = ax1, ylim = (0, max_y), yticks = range(0,max_y+5,5), grid = True)
+    df_desvios_focus.plot(x = 'Tamanho do Círculo de Compensação', y = 'Votos perdidos', ax = ax1, secondary_y = True, ylim = (0, max_y2), yticks = range(0,max_y2+125000,125000))
+    ax1.get_legend().remove()
+
+    # Área zoom
+    ax0.fill_between((0,55), 0, max_y, facecolor='grey', alpha=0.1)
+
+    # Linha esquerda
+    con1 = ConnectionPatch(xyA=(0, 0), coordsA=ax0.transData, 
+                        xyB=(-2.5, max_y), coordsB=ax1.transData, color = 'black')
+    con1.set_linewidth(0.3)
+    fig.add_artist(con1)
+
+    # Linha direita
+    con2 = ConnectionPatch(xyA=(55, 0), coordsA=ax0.transData, 
+                        xyB=(57.5, max_y), coordsB=ax1.transData, color = 'black')
+    con2.set_linewidth(0.3)
+    fig.add_artist(con2)
+
+    # Adicionar legendas dos eixos y
+    fig.text(x=0.075,y=0.275,s="Desvio de proporcionalidade (%)", rotation = 'vertical')
+    fig.text(x=0.975,y=0.38,s="Votos perdidos", rotation = 'vertical')
+
+    st.pyplot(fig)
+
+
 # Simular resultados de uma eleição dada uma lista de tamanhos de círculo de compensação
 def simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros):
 
-    df_desvios = pd.DataFrame(columns = ['circulo_compensacao', 'desvio_proporcionalidade', 'votos_perdidos'])
+    if isinstance(tamanho_cc, range):
+        df_desvios = pd.DataFrame(columns = ['circulo_compensacao', 'desvio_proporcionalidade', 'votos_perdidos'])
 
-    df_reduzido = reduzir(df_mandatos, tamanho_cc, tamanho_circulo_minimo)
-    df_simulacao, df_perdidos = metodo_hondt(df_reduzido, df_votos, tamanho_cc, incluir_estrangeiros)
-    
-    plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, tamanho_cc)
+        for t in tamanho_cc:
+            df_reduzido = reduzir(df_mandatos, t, tamanho_circulo_minimo)
+            df_simulacao, df_perdidos = metodo_hondt(df_reduzido, df_votos, t, incluir_estrangeiros)
+            desvio = calcular_desvio(df_simulacao)
+            votos_perdidos = sum(df_perdidos['votos'])
+            df_desvios.loc[len(df_desvios)] = [t, desvio*100.0, votos_perdidos]
 
+        plot_desvios(df_desvios, eleicao)
 
-    return df_perdidos
+    else: 
+        df_reduzido = reduzir(df_mandatos, tamanho_cc, tamanho_circulo_minimo)
+        df_simulacao, df_perdidos = metodo_hondt(df_reduzido, df_votos, tamanho_cc, incluir_estrangeiros)
+        plot_comparacao(df_votos, df_simulacao, df_perdidos, df_mandatos, df_reduzido, eleicao, t)
 
 
 # Convert numbers to 'k' format
@@ -527,19 +605,15 @@ def format_k(x):
 
 
 # Simular 
-def main(eleicao, tamanho_circulo_minimo, tamanho_cc = range(0, 231), incluir_estrangeiros = True):
+def main(eleicao, tamanho_circulo_minimo, tamanho_maximo_circulo_compensacao, tamanho_cc = None, incluir_estrangeiros = True):
+
+    if tamanho_cc is None:
+        tamanho_cc = range(0, tamanho_maximo_circulo_compensacao, 5)
 
     df_mandatos = pd.read_csv(f'./eleicoes/mandatos/{eleicao}.csv')
     df_votos = pd.read_csv(f'./eleicoes/votos/{eleicao}.csv')
 
-    df_perdidos  = simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
-
-    url = 'https://www.parlamento.pt/ActividadeParlamentar/Paginas/DetalheIniciativa.aspx?BID=263540'
-    st.write("Não se pode continuar a ignorar o elefante na sala do nosso sistema eleitoral. É crucial agir para fortalecer a nossa democracia, garantindo que cada voto conta. Convido todos os cidadãos conscientes e comprometidos com um sistema eleitoral mais representativo e justo a visitar esta [proposta](%s) detalhada no site do Parlamento Português. Não há portugueses de segunda, não pode haver votos de segunda." % url)
-    st.image('./votos_que_contam.png')
-    st.divider()
-    st.write('\u00a9 Pedro Schuller 2025')  
-
+    simular_eleicao(df_mandatos, df_votos, tamanho_cc, tamanho_circulo_minimo, eleicao, incluir_estrangeiros)
 
 # Listar eleições a simular
 eleicao = st.selectbox(
@@ -550,7 +624,7 @@ eleicao = st.selectbox(
 tamanho_circulo_minimo = 2
 
 # Círculos eleitorais do estrangeiro contam para o círculo nacional de compensação? 
-incluir_estrangeiros = st.toggle('Votos nos círculos eleitorais internacionais contam para o círculo nacional de compensação?', value = False)
+incluir_estrangeiros = st.toggle('Votos nos círculos eleitorais internacionais contam para o círculo nacional de compensação?', value = True)
 
 # simulação não pode retirar mais deputados do que o mínimo 
 tamanho_maximo_circulo_compensacao = 230 - (20 + 2 * incluir_estrangeiros) * tamanho_circulo_minimo - 4 * operator.not_(incluir_estrangeiros)
@@ -560,4 +634,11 @@ tamanho_cc = st.slider('Número de deputados no círculo de compensação nacion
 
 
 if __name__ == "__main__":
-   main(eleicao, tamanho_circulo_minimo, tamanho_cc, incluir_estrangeiros)
+   main(eleicao, tamanho_circulo_minimo, tamanho_maximo_circulo_compensacao, tamanho_cc, incluir_estrangeiros)
+   main(eleicao, tamanho_circulo_minimo)
+
+
+st.write("Não se pode continuar a ignorar o elefante na sala do nosso sistema eleitoral. É crucial agir para fortalecer a nossa democracia, garantindo que cada voto conta.  Não há portugueses de segunda, não pode haver votos de segunda.")
+st.image('./votos_que_contam.png')
+st.divider()
+st.write('\u00a9 Pedro Schuller 2025')  
