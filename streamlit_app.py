@@ -635,7 +635,7 @@ tamanho_cc = st.slider('Número de deputados no círculo de compensação nacion
 
 if __name__ == "__main__":
    main(eleicao, tamanho_circulo_minimo, tamanho_maximo_circulo_compensacao, tamanho_cc, incluir_estrangeiros)
-   main(eleicao, tamanho_circulo_minimo)
+   main(eleicao, tamanho_circulo_minimo, tamanho_maximo_circulo_compensacao)
 
 
 st.write("Não se pode continuar a ignorar o elefante na sala do nosso sistema eleitoral. É crucial agir para fortalecer a nossa democracia, garantindo que cada voto conta.  Não há portugueses de segunda, não pode haver votos de segunda.")
